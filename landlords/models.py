@@ -1,3 +1,18 @@
-from django.db import models
+# landlords/models.py
 
-# Create your models here.
+from django.db import models
+from django.contrib.auth import get_user_model  # <- use your new user model
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+User = get_user_model()
+
+class LandlordProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='landlordprofile')
+    # any other fields
+
+@receiver(post_save, sender=LandlordProfile)
+def assign_landlord_role(sender, instance, created, **kwargs):
+    if created:
+        instance.user.role = 'landlord'
+        instance.user.save()
