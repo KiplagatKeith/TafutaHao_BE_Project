@@ -4,6 +4,7 @@ from django.urls import path
 from . import views
 from .views import delete_property_image
 
+# Define the app name for namespacing
 app_name = 'landlords'
 
 urlpatterns = [

@@ -3,6 +3,7 @@
 from django.urls import path
 from .views import BrowsePropertiesView, FavoritePropertyView, FavoritePropertyDeleteView, TenantProfileView
 
+# Define the app name for namespacing
 app_name = 'tenants'
 
 urlpatterns = [
