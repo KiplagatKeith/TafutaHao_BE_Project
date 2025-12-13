@@ -1,0 +1,109 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Rental System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+    <div id="popup-messages" style="display: none;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            <button class="close-btn" onclick="document.getElementById('popup-messages').style.display='none'">
+                OK
+            </button>
+        {% endif %}
+    </div>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const popup = document.getElementById("popup-messages");
+        if (popup.innerText.trim() !== "") {
+            popup.style.display = "block";
+        }
+    });
+    </script>
+
+    <header style="display:flex; justify-content: space-between; align-items:center; padding: 15px; border-bottom: 1px solid #ddd;">
+        <h1><a href="{% url 'tenants:browse_properties' %}" style="text-decoration:none; color:black;">Rental System</a></h1>
+
+        <div class="account-menu" style="position:relative;">
+            <button id="account-circle" style="width:40px; height:40px; border-radius:50%; background:black; color:white; border:none; cursor:pointer;">
+                <!-- Always show company icon here later. Temporary placeholder: -->
+                ★
+            </button>
+
+            {% comment %} DROPDOWN RULES {% endcomment %}
+
+
+            
+            {% if user.is_authenticated %}
+                <!-- Logged-in dropdown -->
+                <div id="account-dropdown" style="display:none; position:absolute; right:0; background:white; border:1px solid #ddd; border-radius:4px; margin-top:5px; min-width:150px; z-index:10;">
+                    <span style="display:block; padding:8px 12px; border-bottom:1px solid #eee;">Hello, {{ user.username }}!</span>
+                
+                    {% if user.tenantprofile %}
+                        <a href="{% url 'tenants:tenant_profile' %}" style="display:block; padding:8px 12px;">My Profile</a>
+                    {% endif %}
+                
+                    {% if user.landlordprofile %}
+                        <a href="{% url 'landlords:landlord_property_list' %}" style="display:block; padding:8px 12px;">My Properties</a>
+                        <a href="{% url 'landlords:landlord_property_create' %}" style="display:block; padding:8px 12px;">Add Property</a>
+                    {% endif %}
+                
+                    <!-- Logout form -->
+                    <form method="POST" action="{% url 'accounts:logout' %}" style="margin:0;">
+                        {% csrf_token %}
+                        <button type="submit" style="display:block; padding:8px 12px; color:red; border:none; background:none; width:100%; text-align:left; cursor:pointer;">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+                
+            {% else %}
+                {% comment %} Only show Login/Signup dropdown if NOT on login or signup pages {% endcomment %}
+                {% if request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'signup' %}
+                    <div id="account-dropdown" style="display:none; position:absolute; right:0; background:white; border:1px solid #ddd; border-radius:4px; margin-top:5px; min-width:150px; z-index:10;">
+                        <a href="{% url 'accounts:login' %}" style="display:block; padding:8px 12px;">Login</a>
+                        <a href="{% url 'accounts:signup' %}" style="display:block; padding:8px 12px;">Signup</a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </header>
+
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Rental System</p>
+    </footer>
+
+    <script>
+        const circle = document.getElementById('account-circle');
+        const dropdown = document.getElementById('account-dropdown');
+
+        if (circle && dropdown) {
+            circle.addEventListener('click', () => {
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            });
+        
+            document.addEventListener('click', function(e) {
+                if (!circle.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
