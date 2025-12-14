@@ -1,0 +1,88 @@
+<!-- templates/properties/property_form.html-->
+ 
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="max-width: 650px; margin: auto; padding: 20px;">
+    
+    <h2>{{ title }}</h2>
+
+    <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px;">
+        {% csrf_token %}
+
+        <!-- Other fields -->
+        <div>
+            {{ form.house_type.label_tag }}
+            {{ form.house_type }}
+        </div>
+        <div>
+            {{ form.house_number.label_tag }}
+            {{ form.house_number }}
+        </div>
+        <div>
+            {{ form.rent.label_tag }}
+            {{ form.rent }}
+        </div>
+        <div>
+            {{ form.county.label_tag }}
+            {{ form.county }}
+        </div>
+        <div>
+            {{ form.town.label_tag }}
+            {{ form.town }}
+        </div>
+        <div>
+            {{ form.location.label_tag }}
+            {{ form.location }}
+        </div>
+        <div>
+            {{ form.description.label_tag }}
+            {{ form.description }}
+        </div>
+        <div>
+            {{ form.available.label_tag }}
+            {{ form.available }}
+        </div>
+
+        <!-- Render the multiple images field manually -->
+        <div>
+            {{ form.images.label_tag }}
+            {{ form.images }}
+        </div>
+
+        <!-- Existing images (if editing) -->
+        {% if editing %}
+            <hr>
+            <h3>Existing Images</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                {% for img in images %}
+                    <div style="position: relative; width: 140px;">
+                        <img src="{{ img.image.url }}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px;">
+                        <button type="button" onclick="deleteImage({{ img.id }})">✕</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <button type="submit">{{ button_text }}</button>
+        <a href="{{ cancel_url }}">Cancel</a>
+    </form>
+
+</div>
+
+<script>
+function deleteImage(imageId) {
+    fetch(`/landlords/delete-image/${imageId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    }).then(response => response.json())
+      .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+<!-- templates/properties/property_detail.html --> 
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ property.house_type }} - {{ property.house_number }}</h1>
+<p>Location: {{ property.location }}</p>
+<p>Rent: KES {{ property.rent }}</p>
+<p>{{ property.description }}</p>
+<p>Available: {% if property.available %}Yes{% else %}No{% endif %}</p>
+<p>Landlord: {{ property.landlord.user.username }}</p>
+{% endblock %}
