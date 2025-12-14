@@ -1000,3 +1000,110 @@ Traceback (most recent call last):
     raise InconsistentMigrationHistory(
 django.db.migrations.exceptions.InconsistentMigrationHistory: Migration admin.0001_initial is applied before its dependency accounts.0001_initial on database 'default'.
 [ERROR] migrate failed.
+=== DJFULL START === Sun Dec 14 10:38:57 PM EAT 2025
+[1] makemigrations...
+Traceback (most recent call last):
+  File "/home/keith/python_projects/TafutaHao/manage.py", line 22, in <module>
+    main()
+  File "/home/keith/python_projects/TafutaHao/manage.py", line 18, in main
+    execute_from_command_line(sys.argv)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/__init__.py", line 436, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 416, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 460, in execute
+    output = self.handle(*args, **options)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 107, in wrapper
+    res = handle_func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/commands/makemigrations.py", line 159, in handle
+    loader.check_consistent_history(connection)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/db/migrations/loader.py", line 327, in check_consistent_history
+    raise InconsistentMigrationHistory(
+django.db.migrations.exceptions.InconsistentMigrationHistory: Migration admin.0001_initial is applied before its dependency accounts.0001_initial on database 'default'.
+[ERROR] makemigrations failed.
+=== DJFULL START === Sun Dec 14 10:41:06 PM EAT 2025
+[1] makemigrations...
+Migrations for 'accounts':
+  accounts/migrations/0001_initial.py
+    + Create model CustomUser
+Migrations for 'landlords':
+  landlords/migrations/0001_initial.py
+    + Create model LandlordProfile
+Migrations for 'properties':
+  properties/migrations/0001_initial.py
+    + Create model Property
+    + Create model PropertyImage
+Migrations for 'tenants':
+  tenants/migrations/0001_initial.py
+    + Create model TenantProfile
+    + Create model FavoriteProperty
+[2] migrate...
+Traceback (most recent call last):
+  File "/home/keith/python_projects/TafutaHao/manage.py", line 22, in <module>
+    main()
+  File "/home/keith/python_projects/TafutaHao/manage.py", line 18, in main
+    execute_from_command_line(sys.argv)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/__init__.py", line 436, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 416, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 460, in execute
+    output = self.handle(*args, **options)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 107, in wrapper
+    res = handle_func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/commands/migrate.py", line 117, in handle
+    executor.loader.check_consistent_history(connection)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/db/migrations/loader.py", line 327, in check_consistent_history
+    raise InconsistentMigrationHistory(
+django.db.migrations.exceptions.InconsistentMigrationHistory: Migration admin.0001_initial is applied before its dependency accounts.0001_initial on database 'default'.
+[ERROR] migrate failed.
+=== DJFULL START === Sun Dec 14 10:42:50 PM EAT 2025
+[1] makemigrations...
+Migrations for 'accounts':
+  accounts/migrations/0001_initial.py
+    + Create model CustomUser
+Migrations for 'landlords':
+  landlords/migrations/0001_initial.py
+    + Create model LandlordProfile
+Migrations for 'properties':
+  properties/migrations/0001_initial.py
+    + Create model Property
+    + Create model PropertyImage
+Migrations for 'tenants':
+  tenants/migrations/0001_initial.py
+    + Create model TenantProfile
+    + Create model FavoriteProperty
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying landlords.0001_initial... OK
+  Applying properties.0001_initial... OK
+  Applying sessions.0001_initial... OK
+  Applying tenants.0001_initial... OK
