@@ -4,8 +4,9 @@ from django import forms
 from properties.models import Property
 from properties.constants import KENYA_COUNTIES
 
+
 # Custom widget to allow multiple file uploads
-class MultiFileClearableInput(forms.ClearableFileInput):
+class MultiFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
 # Form for Property model
@@ -17,11 +18,6 @@ class PropertyForm(forms.ModelForm):
         label="County"
     )
 
-    images = forms.FileField(
-        widget=forms.ClearableFileInput(attrs={'multiple': True}),
-        required=False,
-        label="Property Images"
-    )
     
     class Meta:
         model = Property
@@ -49,3 +45,4 @@ class PropertyForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'available': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+

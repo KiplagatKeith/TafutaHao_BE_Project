@@ -1,5 +1,4 @@
 # properties/models.py
-
 from django.db import models
 
 class Property(models.Model):
@@ -41,7 +40,9 @@ class Property(models.Model):
 
 # New model for images
 class PropertyImage(models.Model):
-    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='images')
+    property = models.ForeignKey(Property, 
+                                 on_delete=models.CASCADE, 
+                                 related_name='images')
     image = models.ImageField(upload_to='property_photos/')
     
     def __str__(self):

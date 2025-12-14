@@ -78,18 +78,21 @@ class LandlordPropertyCreateView(LoginRequiredMixin, LandlordRequiredMixin, Perm
         context = super().get_context_data(**kwargs)
         context['title'] = "Add Property"
         context['button_text'] = "Add Property"
-        context['cancel_url'] = reverse_lazy('landlords:landlord_property_list')
+        context['cancel_url'] = reverse_lazy('landlords:landlord_dashboard')
         return context
 
     # Save property and handle uploaded images
     def form_valid(self, form):
+        # Link property to landlord
         landlord_profile, _ = LandlordProfile.objects.get_or_create(user=self.request.user)
         form.instance.landlord = landlord_profile  # assign landlord
+        
         response = super().form_valid(form)
 
-        # Save each uploaded image to PropertyImage
-        for img in self.request.FILES.getlist('images'):
-            PropertyImage.objects.create(property=self.object, image=img)
+        # Handle multiple images
+        files = self.request.FILES.getlist('images')
+        for f in files:
+            PropertyImage.objects.create(property=self.object, image=f)
 
         return response
 
@@ -119,14 +122,18 @@ class LandlordPropertyUpdateView(LoginRequiredMixin, PermissionRequiredMixin, Up
         context['editing'] = True
         context['title'] = f"Edit Property: {self.object.get_house_type_display()} - {self.object.house_number}"
         context['button_text'] = "Save Changes"
-        context['cancel_url'] = reverse_lazy('landlords:landlord_property_list')
+        context['cancel_url'] = reverse_lazy('landlords:landlord_dashboard')
         return context
 
     # Save updated property and any new images
     def form_valid(self, form):
         response = super().form_valid(form)
-        for img in self.request.FILES.getlist('images'):
-            PropertyImage.objects.create(property=self.object, image=img)
+
+        # Save new images uploaded during edit
+        files = self.request.FILES.getlist('images')
+        for f in files:
+            PropertyImage.objects.create(property=self.object, image=f)
+
         return response
 
 
