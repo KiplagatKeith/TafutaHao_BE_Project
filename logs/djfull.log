@@ -750,3 +750,143 @@ Traceback (most recent call last):
     raise ValueError(
 ValueError: ClearableFileInput doesn't support uploading multiple files.
 [ERROR] makemigrations failed.
+=== DJFULL START === Sun Dec 14 05:34:48 PM EAT 2025
+[1] makemigrations...
+Traceback (most recent call last):
+  File "/home/keith/python_projects/TafutaHao/manage.py", line 22, in <module>
+    main()
+  File "/home/keith/python_projects/TafutaHao/manage.py", line 18, in main
+    execute_from_command_line(sys.argv)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/__init__.py", line 436, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 416, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 457, in execute
+    self.check(**check_kwargs)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 492, in check
+    all_issues = checks.run_checks(
+                 ^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/checks/registry.py", line 89, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/checks/urls.py", line 136, in check_custom_error_handlers
+    handler = resolver.resolve_error_handler(status_code)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/urls/resolvers.py", line 732, in resolve_error_handler
+    callback = getattr(self.urlconf_module, "handler%s" % view_type, None)
+                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/urls/resolvers.py", line 711, in urlconf_module
+    return import_module(self.urlconf_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/keith/python_projects/TafutaHao/TafutaHao/urls.py", line 41, in <module>
+    path('landlord/', include(('landlords.urls', 'landlords'), namespace = 'landlords')),
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/urls/conf.py", line 39, in include
+    urlconf_module = import_module(urlconf_module)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/keith/python_projects/TafutaHao/landlords/urls.py", line 4, in <module>
+    from . import views
+  File "/home/keith/python_projects/TafutaHao/landlords/views.py", line 9, in <module>
+    from .forms import PropertyForm
+  File "/home/keith/python_projects/TafutaHao/landlords/forms.py", line 12, in <module>
+    class PropertyForm(forms.ModelForm):
+  File "/home/keith/python_projects/TafutaHao/landlords/forms.py", line 21, in PropertyForm
+    widget=forms.ClearableFileInput(attrs={'multiple': True}),
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/forms/widgets.py", line 491, in __init__
+    raise ValueError(
+ValueError: ClearableFileInput doesn't support uploading multiple files.
+[ERROR] makemigrations failed.
+=== DJFULL START === Sun Dec 14 06:04:55 PM EAT 2025
+[1] makemigrations...
+Traceback (most recent call last):
+  File "/home/keith/python_projects/TafutaHao/manage.py", line 22, in <module>
+    main()
+  File "/home/keith/python_projects/TafutaHao/manage.py", line 18, in main
+    execute_from_command_line(sys.argv)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/__init__.py", line 436, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 416, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 457, in execute
+    self.check(**check_kwargs)
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/management/base.py", line 492, in check
+    all_issues = checks.run_checks(
+                 ^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/checks/registry.py", line 89, in run_checks
+    new_errors = check(app_configs=app_configs, databases=databases)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/core/checks/urls.py", line 136, in check_custom_error_handlers
+    handler = resolver.resolve_error_handler(status_code)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/urls/resolvers.py", line 732, in resolve_error_handler
+    callback = getattr(self.urlconf_module, "handler%s" % view_type, None)
+                       ^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/utils/functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/urls/resolvers.py", line 711, in urlconf_module
+    return import_module(self.urlconf_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/keith/python_projects/TafutaHao/TafutaHao/urls.py", line 41, in <module>
+    path('landlord/', include(('landlords.urls', 'landlords'), namespace = 'landlords')),
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/urls/conf.py", line 39, in include
+    urlconf_module = import_module(urlconf_module)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1331, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 935, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/home/keith/python_projects/TafutaHao/landlords/urls.py", line 4, in <module>
+    from . import views
+  File "/home/keith/python_projects/TafutaHao/landlords/views.py", line 9, in <module>
+    from .forms import PropertyForm
+  File "/home/keith/python_projects/TafutaHao/landlords/forms.py", line 12, in <module>
+    class PropertyForm(forms.ModelForm):
+  File "/home/keith/python_projects/TafutaHao/landlords/forms.py", line 21, in PropertyForm
+    widget=forms.ClearableFileInput(attrs={'multiple': True}),
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/keith/python_projects/venv/lib/python3.12/site-packages/django/forms/widgets.py", line 491, in __init__
+    raise ValueError(
+ValueError: ClearableFileInput doesn't support uploading multiple files.
+[ERROR] makemigrations failed.
