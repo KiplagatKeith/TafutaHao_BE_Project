@@ -1,0 +1,191 @@
+<!-- templates/tenants/browse_properties.html -->
+ 
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="max-width: 1100px; margin:auto; padding:20px;">
+    <h2>Browse Available Properties</h2>
+
+    <!-- Search and Filter Form -->
+    <form method="get" class="filter-form" style="margin:15px 0; display:flex; flex-wrap:wrap; gap:10px;">
+        <input type="text" name="q" placeholder="Search (description)" value="{{ search_query }}" style="flex:2; padding:8px;">
+        <input type="number" name="min_rent" placeholder="Min Rent" value="{{ min_rent }}" style="flex:1; padding:8px;">
+        <input type="number" name="max_rent" placeholder="Max Rent" value="{{ max_rent }}" style="flex:1; padding:8px;">
+
+        <select name="county" id="county-select" style="flex:1; padding:8px;">
+            <option value="">County (Any)</option>
+            {% for c in counties %}
+                <option value="{{ c }}" {% if c == county %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="town" id="town-select" style="flex:1; padding:8px;">
+            <option value="">Town/City (Any)</option>
+            {% for t in towns %}
+                <option value="{{ t }}" {% if t == town %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="text" name="location" placeholder="Location" value="{{ location }}" style="flex:1; padding:8px;">
+
+        <select name="house_type" style="flex:1; padding:8px;">
+            <option value="">House Type (Any)</option>
+            <option value="single" {% if house_type == "single" %}selected{% endif %}>Single Room</option>
+            <option value="bedsitter" {% if house_type == "bedsitter" %}selected{% endif %}>Bedsitter</option>
+            <option value="1BR" {% if house_type == "1BR" %}selected{% endif %}>One Bedroom</option>
+            <option value="2BR" {% if house_type == "2BR" %}selected{% endif %}>Two Bedroom</option>
+            <option value="3BR" {% if house_type == "3BR" %}selected{% endif %}>Three Bedroom</option>
+            <option value="shared" {% if house_type == "shared" %}selected{% endif %}>Shared Unit</option>
+        </select>
+
+        <button type="submit" style="padding:8px 14px; background:black; color:white; border-radius:4px;">Filter</button>
+    </form>
+
+    <!-- Property Cards -->
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap:15px; margin-top:25px;">
+        {% for property in properties %}
+        <div style="border:1px solid #ddd; padding:15px; border-radius:8px; transition: transform 0.2s;" 
+             onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            
+            <!-- Image Carousel -->
+            <div class="property-carousel" 
+                 style="position:relative; width:100%; height:180px; overflow:hidden; border-radius:6px;"
+                 data-property-id="{{ property.id }}">
+                {% if property.images.all %}
+                    <img id="property-img-{{ property.id }}" src="{{ property.images.all.0.image.url }}" 
+                         style="width:100%; height:100%; object-fit:cover;">
+                    {% if property.images.count > 1 %}
+                        <button class="prev-btn" style="position:absolute; top:50%; left:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:30px; height:30px;">‹</button>
+                        <button class="next-btn" style="position:absolute; top:50%; right:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:30px; height:30px;">›</button>
+                    {% endif %}
+                {% else %}
+                    <div style="width:100%; height:100%; background:#eee; display:flex; align-items:center; justify-content:center;">
+                        <span>No Image</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Property Info -->
+            <h4 style="margin-top:10px;">{{ property.get_house_type_display }} - {{ property.house_number }}</h4>
+            <p><strong>Rent:</strong> KES {{ property.rent }}</p>
+            <p><strong>County:</strong> {{ property.county }}</p>
+            <p><strong>Town/City:</strong> {{ property.town }}</p>
+            <p><strong>Location:</strong> {{ property.location }}</p>
+            <p style="font-size:14px; opacity:0.9;">{{ property.description|truncatewords:20 }}</p>
+
+            <!-- Favorite Button -->
+            <form method="post" action="{% url 'tenants:favorite_property' property.id %}">
+                {% csrf_token %}
+                {% if user.is_authenticated and property.id in favorite_property_ids %}
+                    <button type="submit" style="background:red; color:white; padding:6px 10px; border:none; border-radius:4px;">♥ Unfavorite</button>
+                {% else %}
+                    <button type="submit" style="background:#555; color:white; padding:6px 10px; border:none; border-radius:4px;">♡ Favorite</button>
+                {% endif %}
+            </form>
+        </div>
+        {% empty %}
+            <p>No properties match your search.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div style="text-align:center; margin-top:20px;">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&min_rent={{ min_rent }}&max_rent={{ max_rent }}&county={{ county }}&town={{ town }}&location={{ location }}&house_type={{ house_type }}">« Previous</a>
+        {% endif %}
+        <span style="margin:0 10px;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&min_rent={{ min_rent }}&max_rent={{ max_rent }}&county={{ county }}&town={{ town }}&location={{ location }}&house_type={{ house_type }}">Next »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const countySelect = document.getElementById('county-select');
+    const townSelect = document.getElementById('town-select');
+    const ajaxTownsUrl = "{% url 'properties:get_towns_by_county' %}";
+
+    countySelect.addEventListener('change', function() {
+        const selectedCounty = this.value.trim();
+        townSelect.innerHTML = '<option value="">Town/City (Any)</option>';
+        if (!selectedCounty) return;
+
+        fetch(`${ajaxTownsUrl}?county=${encodeURIComponent(selectedCounty)}`)
+            .then(res => res.json())
+            .then(data => {
+                data.towns.forEach(town => {
+                    const option = document.createElement('option');
+                    option.value = town;
+                    option.textContent = town;
+                    townSelect.appendChild(option);
+                });
+            });
+    });
+
+    // Prepare property images
+    const propertyImages = {
+        {% for property in properties %}
+            {{ property.id }}: [
+                {% for img in property.images.all %}
+                    "{{ img.image.url }}",
+                {% endfor %}
+            ],
+        {% endfor %}
+    };
+
+    const propertyImageIndex = {};
+
+    // Functions
+    function showImage(propertyId, index) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length === 0) return;
+        document.getElementById(`property-img-${propertyId}`).src = imgs[index];
+        propertyImageIndex[propertyId] = index;
+    }
+
+    function nextImage(propertyId) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length <= 1) return;
+        let idx = (propertyImageIndex[propertyId] || 0) + 1;
+        if (idx >= imgs.length) idx = 0;
+        showImage(propertyId, idx);
+    }
+
+    function prevImage(propertyId) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length <= 1) return;
+        let idx = (propertyImageIndex[propertyId] || 0) - 1;
+        if (idx < 0) idx = imgs.length - 1;
+        showImage(propertyId, idx);
+    }
+
+    // Attach buttons and swipe events
+    document.querySelectorAll('.property-carousel').forEach(carousel => {
+        const propertyId = carousel.dataset.propertyId;
+        const prevBtn = carousel.querySelector('.prev-btn');
+        const nextBtn = carousel.querySelector('.next-btn');
+
+        if (prevBtn) prevBtn.addEventListener('click', () => prevImage(propertyId));
+        if (nextBtn) nextBtn.addEventListener('click', () => nextImage(propertyId));
+
+        // Touch events for mobile swipe
+        let startX = 0;
+        carousel.addEventListener('touchstart', e => {
+            startX = e.touches[0].clientX;
+        });
+        carousel.addEventListener('touchend', e => {
+            const endX = e.changedTouches[0].clientX;
+            const diff = endX - startX;
+            if (Math.abs(diff) > 30) { // swipe threshold
+                if (diff < 0) nextImage(propertyId);
+                else prevImage(propertyId);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
