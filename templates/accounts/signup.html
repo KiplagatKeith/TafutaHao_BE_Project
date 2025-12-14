@@ -1,0 +1,36 @@
+<!-- signup.html-->
+
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width:600px; margin:40px auto; padding:20px; border:1px solid #ddd; border-radius:8px;">
+    <h2>Sign Up</h2>
+    <form method="POST">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <ul style="color:red;">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        {% for field in form %}
+            <div style="margin-bottom: 12px;">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <ul style="color:red;">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit">Register</button>
+    </form>
+</div>
+{% endblock %}

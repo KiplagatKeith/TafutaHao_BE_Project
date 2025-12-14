@@ -1,0 +1,16 @@
+<!--choose_role.html-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Choose Your Role</h2>
+<p>Do you want to register as a Landlord?</p>
+
+<form method="get" action="{% url 'browse_properties' %}">
+    <button type="submit">No, continue as Tenant</button>
+</form>
+
+<form method="get" action="{% url 'landlord_register' %}">
+    <button type="submit">Yes, register as Landlord</button>
+</form>
+{% endblock %}

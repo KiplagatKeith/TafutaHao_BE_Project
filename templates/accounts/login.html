@@ -1,0 +1,13 @@
+<!-- login.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Landlord Registration</h2>
+<p>Register yourself as a landlord and add at least one property.</p>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Finish Registration</button>
+</form>
+{% endblock %}
