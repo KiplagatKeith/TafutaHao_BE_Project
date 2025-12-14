@@ -1,0 +1,179 @@
+/* General body style */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header styling */
+header {
+    background-color: #f8f8f8;
+}
+
+/* Links in header */
+header a {
+    text-decoration: none;
+    color: black;
+}
+
+/* Account dropdown */
+#account-dropdown a {
+    color: black;
+}
+
+#account-dropdown a:hover {
+    background-color: #f0f0f0;
+}
+
+/* Main content */
+main {
+    padding: 20px;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-top: 1px solid #ddd;
+}
+
+/* Buttons */
+button {
+    cursor: pointer;
+}
+
+/* Optional: Make dropdown visually smoother */
+#account-dropdown {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* ================================
+   CENTERED DJANGO MESSAGE POPUP
+   ================================ */
+
+#centered-messages {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    z-index: 9999;
+    width: 90%;
+    max-width: 400px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    text-align: center;
+}
+
+/* Message styling */
+#centered-messages .message {
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Type variations */
+#centered-messages .success {
+    background-color: #d4edda;
+    color: #155724;
+}
+#centered-messages .error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+#centered-messages .info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -60%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.multi-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.multi-dropdown-btn {
+    padding: 8px;
+    min-width: 180px;
+    background: #fff;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.multi-dropdown-menu {
+    display: none;
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+    width: 230px;
+    z-index: 1000;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+.multi-dropdown-menu label {
+    display: block;
+    margin-bottom: 6px;
+    cursor: pointer;
+}
+
+/* Dropdown wrapper */
+.dropdown-container {
+    width: 250px;
+    position: relative;
+    margin-bottom: 12px;
+    font-family: Arial, sans-serif;
+}
+
+/* Dropdown button (looks like a select box) */
+.dropdown-btn {
+    padding: 10px;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+/* Hidden dropdown content */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: white;
+    width: 100%;
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-top: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    z-index: 10;
+}
+
+/* Each item inside dropdown */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: #f5f5f5;
+}
+
