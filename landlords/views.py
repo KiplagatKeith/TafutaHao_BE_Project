@@ -23,42 +23,81 @@ class LandlordPropertyListView(LoginRequiredMixin, LandlordRequiredMixin, ListVi
     model = Property
     template_name = 'landlords/property_list.html'
     context_object_name = 'properties'
-    paginate_by = 6  # 6 properties per page
+    paginate_by = 6
 
-    # Check if user is landlord or has permission
-    def has_permission(self):
-        user = self.request.user
-        return user.is_authenticated and (user.has_perm(self.permission_required) or user.is_landlord())
-
-    # Filter properties based on search and filters
     def get_queryset(self):
-        queryset = Property.objects.filter(landlord__user=self.request.user)
-        query = self.request.GET.get('q', '')
-        house_type = self.request.GET.get('house_type', '')
-        available = self.request.GET.get('available', '')
+        user = self.request.user
 
-        if query:
+        # Base queryset: ONLY this landlord's properties
+        queryset = Property.objects.filter(landlord__user=user)
+
+        # ---- GET FILTER VALUES ----
+        q = self.request.GET.get('q', '').strip()
+        min_rent = self.request.GET.get('min_rent')
+        max_rent = self.request.GET.get('max_rent')
+        county = self.request.GET.get('county', '').strip()
+        town = self.request.GET.get('town', '').strip()
+        location = self.request.GET.get('location', '').strip()
+        house_type = self.request.GET.get('house_type', '').strip()
+
+        # ---- APPLY FILTERS ----
+        if q:
             queryset = queryset.filter(
-                Q(house_number__icontains=query) |
-                Q(location__icontains=query)
+                Q(description__icontains=q) |
+                Q(house_number__icontains=q)
             )
+
+        if min_rent:
+            queryset = queryset.filter(rent__gte=min_rent)
+
+        if max_rent:
+            queryset = queryset.filter(rent__lte=max_rent)
+
+        if county:
+            queryset = queryset.filter(county__iexact=county)
+
+        if town:
+            queryset = queryset.filter(town__iexact=town)
+
+        if location:
+            queryset = queryset.filter(location__icontains=location)
+
         if house_type:
             queryset = queryset.filter(house_type=house_type)
-        if available.lower() == 'true':
-            queryset = queryset.filter(available=True)
-        elif available.lower() == 'false':
-            queryset = queryset.filter(available=False)
-        return queryset
 
-    # Pass filter values back to template for keeping them in forms
+        return queryset.order_by('-created_at')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('q', '')
-        context['house_type'] = self.request.GET.get('house_type', '')
-        context['available'] = self.request.GET.get('available', '')
+
+        # ---- Persist filter values in template ----
+        context.update({
+            'search_query': self.request.GET.get('q', ''),
+            'min_rent': self.request.GET.get('min_rent', ''),
+            'max_rent': self.request.GET.get('max_rent', ''),
+            'county': self.request.GET.get('county', ''),
+            'town': self.request.GET.get('town', ''),
+            'location': self.request.GET.get('location', ''),
+            'house_type': self.request.GET.get('house_type', ''),
+        })
+
+        # ---- Populate dropdowns (same as tenant view) ----
+        context['counties'] = (
+            Property.objects
+            .filter(landlord__user=self.request.user)
+            .values_list('county', flat=True)
+            .distinct()
+        )
+
+        context['towns'] = (
+            Property.objects
+            .filter(landlord__user=self.request.user)
+            .values_list('town', flat=True)
+            .distinct()
+        )
+
         return context
-
-
+    
 # =========================
 # Add new property
 # =========================
