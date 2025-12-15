@@ -1107,3 +1107,19 @@ Running migrations:
   Applying properties.0001_initial... OK
   Applying sessions.0001_initial... OK
   Applying tenants.0001_initial... OK
+=== DJFULL START === Mon Dec 15 03:19:20 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.
+=== DJFULL START === Mon Dec 15 03:19:53 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.

@@ -39,7 +39,19 @@
             <option value="shared" {% if house_type == "shared" %}selected{% endif %}>Shared Unit</option>
         </select>
 
-        <button type="submit" style="padding:8px 14px; background:black; color:white; border-radius:4px;">Filter</button>
+        <!-- Submit Button -->
+        <button type="submit" 
+                style="padding:8px 14px; background:black; color:white; border-radius:4px;">
+            Filter
+        </button>
+
+        <!-- Reset Button -->
+        <a href="{% url 'tenants:browse_properties' %}"
+           style="padding:8px 14px; background:gray; color:white; border-radius:4px;
+                  text-decoration:none; margin-left:5px;">
+           Reset
+        </a>
+
     </form>
 
     <!-- Property Cards -->

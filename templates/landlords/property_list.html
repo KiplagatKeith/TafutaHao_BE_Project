@@ -1,57 +1,145 @@
-<!-- templates/landlords/property_list.html-->
+<!-- templates/landlords/property_list.html -->
+ 
+{% extends "base.html" %}
+{% load static %}
 
-{% extends 'base.html' %}
 {% block content %}
-<div class="container" style="max-width: 600px; margin: auto; padding: 20px;">
+<div class="container" style="max-width:1100px; margin:auto; padding:20px;">
+    <h2>My Properties</h2>
 
-    <h1>
-        {% if form.instance.pk %}
-            Edit Property
-        {% else %}
-            Add New Property
-        {% endif %}
-    </h1>
+    <!-- FILTER FORM -->
+    <form method="get"
+          style="margin:15px 0; display:flex; flex-wrap:wrap; gap:10px;">
 
-    <form method="post" style="display: flex; flex-direction: column; gap: 15px;">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+        <input type="text" name="q" placeholder="Search (description)"
+               value="{{ search_query }}" style="flex:2; padding:8px;">
 
-        <div>
-            <label for="{{ form.house_type.id_for_label }}">House Type</label>
-            {{ form.house_type }}
-        </div>
+        <input type="number" name="min_rent" placeholder="Min Rent"
+               value="{{ min_rent }}" style="flex:1; padding:8px;">
 
-        <div>
-            <label for="{{ form.house_number.id_for_label }}">House Number</label>
-            {{ form.house_number }}
-        </div>
+        <input type="number" name="max_rent" placeholder="Max Rent"
+               value="{{ max_rent }}" style="flex:1; padding:8px;">
 
-        <div>
-            <label for="{{ form.rent.id_for_label }}">Rent (KES)</label>
-            {{ form.rent }}
-        </div>
+        <select name="county" id="county-select" style="flex:1; padding:8px;">
+            <option value="">County (Any)</option>
+            {% for c in counties %}
+                <option value="{{ c }}" {% if c == county %}selected{% endif %}>
+                    {{ c }}
+                </option>
+            {% endfor %}
+        </select>
 
-        <div>
-            <label for="{{ form.location.id_for_label }}">Location</label>
-            {{ form.location }}
-        </div>
+        <select name="town" id="town-select" style="flex:1; padding:8px;">
+            <option value="">Town/City (Any)</option>
+            {% for t in towns %}
+                <option value="{{ t }}" {% if t == town %}selected{% endif %}>
+                    {{ t }}
+                </option>
+            {% endfor %}
+        </select>
 
-        <div>
-            <label for="{{ form.description.id_for_label }}">Description</label>
-            {{ form.description }}
-        </div>
+        <input type="text" name="location" placeholder="Location"
+               value="{{ location }}" style="flex:1; padding:8px;">
 
-        <div>
-            <label for="{{ form.available.id_for_label }}">Available</label>
-            {{ form.available }}
-        </div>
+        <select name="house_type" style="flex:1; padding:8px;">
+            <option value="">House Type (Any)</option>
+            <option value="single" {% if house_type == "single" %}selected{% endif %}>Single Room</option>
+            <option value="bedsitter" {% if house_type == "bedsitter" %}selected{% endif %}>Bedsitter</option>
+            <option value="1BR" {% if house_type == "1BR" %}selected{% endif %}>One Bedroom</option>
+            <option value="2BR" {% if house_type == "2BR" %}selected{% endif %}>Two Bedroom</option>
+            <option value="3BR" {% if house_type == "3BR" %}selected{% endif %}>Three Bedroom</option>
+            <option value="shared" {% if house_type == "shared" %}selected{% endif %}>Shared Unit</option>
+        </select>
 
-        <button type="submit" style="padding: 10px 15px; background: #007BFF; color: white; border-radius: 4px; border: none;">
-            {% if form.instance.pk %}Update Property{% else %}Add Property{% endif %}
+        <!-- FILTER BUTTON -->
+        <button type="submit"
+                style="padding:8px 14px; background:black; color:white;
+                       border-radius:4px;">
+            Filter
         </button>
+
+        <!-- RESET BUTTON -->
+        <a href="{% url 'landlords:landlord_property_list' %}"
+           style="padding:8px 14px; background:gray; color:white; border-radius:4px;
+                  text-decoration:none; margin-left:5px;">
+           Reset
+        </a>
 
     </form>
 
-    <a href="{% url 'landlords:landlord_property_list' %}" style="display: inline-block; margin-top: 15px; text-decoration: none; color: #007BFF;">← Back to My Properties</a>
+    <!-- PROPERTY CARDS -->
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+                gap:15px; margin-top:25px;">
+
+        {% for property in properties %}
+        <div style="border:1px solid #ddd; padding:15px; border-radius:8px;">
+
+            <!-- IMAGE CAROUSEL -->
+            <div class="property-carousel"
+                 style="position:relative; width:100%; height:180px; overflow:hidden; border-radius:6px;"
+                 data-property-id="{{ property.id }}">
+
+                {% if property.images.all %}
+                    <img id="property-img-{{ property.id }}"
+                         src="{{ property.images.all.0.image.url }}"
+                         style="width:100%; height:100%; object-fit:cover;">
+
+                    {% if property.images.count > 1 %}
+                        <button class="prev-btn">‹</button>
+                        <button class="next-btn">›</button>
+                    {% endif %}
+                {% else %}
+                    <div style="width:100%; height:100%; background:#eee;
+                                display:flex; align-items:center; justify-content:center;">
+                        No Image
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- INFO -->
+            <h4 style="margin-top:10px;">
+                {{ property.get_house_type_display }} - {{ property.house_number }}
+            </h4>
+
+            <p><strong>Rent:</strong> KES {{ property.rent }}</p>
+            <p><strong>County:</strong> {{ property.county }}</p>
+            <p><strong>Town:</strong> {{ property.town }}</p>
+            <p><strong>Location:</strong> {{ property.location }}</p>
+            <p>{{ property.description|truncatewords:18 }}</p>
+
+            <!-- ACTIONS -->
+            <div style="display:flex; gap:10px;">
+                <a href="{% url 'landlords:landlord_property_update' property.id %}"
+                   style="flex:1; text-align:center; background:#007bff; color:white;
+                          padding:6px; border-radius:4px; text-decoration:none;">
+                    Edit
+                </a>
+
+                <a href="{% url 'landlords:landlord_property_delete' property.id %}"
+                   onclick="return confirm('Delete this property?');"
+                   style="flex:1; text-align:center; background:#dc3545; color:white;
+                          padding:6px; border-radius:4px; text-decoration:none;">
+                    Delete
+                </a>
+            </div>
+        </div>
+
+        {% empty %}
+            <p>You have no properties yet.</p>
+        {% endfor %}
+    </div>
+
+    <!-- PAGINATION -->
+    {% if is_paginated %}
+    <div style="text-align:center; margin-top:20px;">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">« Previous</a>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Next »</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
