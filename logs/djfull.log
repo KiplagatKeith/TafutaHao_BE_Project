@@ -1131,3 +1131,13 @@ Operations to perform:
   Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
 Running migrations:
   No migrations to apply.
+=== DJFULL START === Tue Dec 16 04:50:09 PM EAT 2025
+[1] makemigrations...
+Migrations for 'landlords':
+  landlords/migrations/0002_landlordfavoriteproperty.py
+    + Create model LandlordFavoriteProperty
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  Applying landlords.0002_landlordfavoriteproperty... OK

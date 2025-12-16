@@ -5,6 +5,10 @@ from .models import Property
 from django.db.models import Q, F, Func, Value
 from django.http import JsonResponse
 from .constants import KENYA_COUNTIES
+from tenants.models import FavoriteProperty
+from django.shortcuts import get_object_or_404
+from tenants.models import TenantProfile
+
 class PropertyListView(ListView):
     model = Property
     template_name = 'properties/property_list.html'
@@ -92,6 +96,26 @@ class PropertyDetailView(DetailView):
     model = Property
     template_name = 'properties/property_detail.html'
     context_object_name = 'property'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        # Default: no favorites
+        favorite_property_ids = []
+
+        if user.is_authenticated:
+            # Safely get the tenant profile if it exists
+            tenant_profile = getattr(user, 'tenantprofile', None)
+            if tenant_profile:
+                favorite_property_ids = FavoriteProperty.objects.filter(
+                    tenant=tenant_profile
+                ).values_list('property_id', flat=True)
+
+        context['favorite_property_ids'] = favorite_property_ids
+        return context
+
+
 
 def get_towns_by_county(request):
     county = request.GET.get('county', '').strip()

@@ -1,11 +1,11 @@
 # landlords/views.py
 
 from django.shortcuts import get_object_or_404, redirect
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from properties.models import Property, PropertyImage
-from .models import LandlordProfile
+from .models import LandlordProfile, LandlordFavoriteProperty
 from .forms import PropertyForm
 from django.db.models import Q
 from .mixins import LandlordRequiredMixin
@@ -14,7 +14,8 @@ from django.utils.decorators import method_decorator
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-
+from properties.constants import KENYA_COUNTIES  # same constant used for dropdown 
+from django.views import View
 
 # =========================
 # List properties for landlord
@@ -235,3 +236,121 @@ def delete_property_image(request, image_id):
     image = get_object_or_404(PropertyImage, id=image_id, property__landlord__user=request.user)
     image.delete()
     return JsonResponse({'success': True})
+
+class LandlordBrowsePropertiesView(LoginRequiredMixin, ListView):
+    model = Property
+    template_name = 'landlords/landlords_browse.html'  # the template we created
+    context_object_name = 'properties'
+    paginate_by = 6
+
+    def get_queryset(self):
+        # Show all available properties
+        queryset = Property.objects.filter(available=True)
+
+        # ---- GET FILTER VALUES ----
+        q = self.request.GET.get('q', '')
+        min_rent = self.request.GET.get('min_rent')
+        max_rent = self.request.GET.get('max_rent')
+        county = self.request.GET.get('county', '').strip().title()
+        town = self.request.GET.get('town', '').strip().title()
+        location = self.request.GET.get('location', '')
+        house_type = self.request.GET.get('house_type', '')
+
+        # ---- APPLY FILTERS ----
+        if q:
+            queryset = queryset.filter(
+                Q(description__icontains=q) |
+                Q(location__icontains=q) |
+                Q(house_type__icontains=q)
+            )
+
+        if min_rent:
+            queryset = queryset.filter(rent__gte=min_rent)
+        if max_rent:
+            queryset = queryset.filter(rent__lte=max_rent)
+        if county:
+            queryset = queryset.filter(county__iexact=county)
+        if town:
+            queryset = queryset.filter(town__iexact=town)
+        if location:
+            queryset = queryset.filter(location__icontains=location)
+        if house_type:
+            queryset = queryset.filter(house_type=house_type)
+
+        return queryset.order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # ---- Dropdowns ----
+        context['counties'] = KENYA_COUNTIES
+        context['county'] = self.request.GET.get('county', '').strip().title()
+        context['town'] = self.request.GET.get('town', '').strip().title()
+
+        # Populate town dropdown dynamically
+        if context['county']:
+            towns = Property.objects.filter(county__iexact=context['county']).values_list('town', flat=True).distinct()
+        else:
+            towns = Property.objects.values_list('town', flat=True).distinct()
+        context['towns'] = sorted([t.strip().title() for t in towns])
+
+        # ---- Keep filter values ----
+        context['search_query'] = self.request.GET.get('q', '')
+        context['min_rent'] = self.request.GET.get('min_rent', '')
+        context['max_rent'] = self.request.GET.get('max_rent', '')
+        context['location'] = self.request.GET.get('location', '')
+        context['house_type'] = self.request.GET.get('house_type', '')
+
+        # ---- Favorite properties for landlord ----
+        user = self.request.user
+        if user.is_authenticated:
+            landlord_profile = getattr(user, 'landlordprofile', None)
+            if landlord_profile:
+                context['favorite_property_ids'] = landlord_profile.landlordfavoriteproperty_set.values_list('property_id', flat=True)
+            else:
+                context['favorite_property_ids'] = []
+        else:
+            context['favorite_property_ids'] = []
+
+        return context
+
+class LandlordFavoritePropertyView(LoginRequiredMixin, View):
+    """
+    Toggle a property as favorite/unfavorite for the landlord.
+    Works via POST only.
+    """
+
+    def post(self, request, property_id, *args, **kwargs):
+        landlord_profile = getattr(request.user, 'landlordprofile', None)
+        if not landlord_profile:
+            return redirect('landlords:landlord_dashboard')
+
+        property_obj = get_object_or_404(Property, id=property_id)
+
+        # Toggle favorite
+        fav, created = LandlordFavoriteProperty.objects.get_or_create(
+            landlord=landlord_profile,
+            property=property_obj
+        )
+        if not created:
+            fav.delete()
+            action = 'unfavorited'
+        else:
+            action = 'favorited'
+
+        # Handle AJAX request
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'action': action, 'property_id': property_id})
+
+        # Regular POST redirect
+        return redirect(request.META.get('HTTP_REFERER', 'landlords:landlord_dashboard'))
+    
+# Landlord Property Detail
+class LandlordPropertyDetailView(LoginRequiredMixin, LandlordRequiredMixin, DetailView):
+    model = Property
+    template_name = 'landlords/landlord_property_detail.html'
+    context_object_name = 'property'
+
+    def get_queryset(self):
+        # Only allow the landlord to view their own properties
+        return Property.objects.filter(landlord__user=self.request.user)

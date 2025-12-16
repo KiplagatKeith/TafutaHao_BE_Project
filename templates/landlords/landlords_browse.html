@@ -1,16 +1,15 @@
-<!-- templates/landlords/property_list.html -->
+<!-- templates/landlords/browse_properties.html -->
 
 {% extends "base.html" %}
 {% load static %}
 
 {% block content %}
 <div class="container" style="max-width: 1100px; margin:auto; padding:20px;">
-    <h2>My Properties</h2>
+    <h2>Browse Available Properties</h2>
 
     <!-- Search and Filter Form -->
     <form method="get" class="filter-form" style="margin:15px 0; display:flex; flex-wrap:wrap; gap:10px;">
-        <input type="text" name="q" placeholder="Search (description or house number)" 
-               value="{{ search_query }}" style="flex:2; padding:8px;">
+        <input type="text" name="q" placeholder="Search (description)" value="{{ search_query }}" style="flex:2; padding:8px;">
         <input type="number" name="min_rent" placeholder="Min Rent" value="{{ min_rent }}" style="flex:1; padding:8px;">
         <input type="number" name="max_rent" placeholder="Max Rent" value="{{ max_rent }}" style="flex:1; padding:8px;">
 
@@ -44,7 +43,7 @@
                 style="padding:8px 14px; background:black; color:white; border-radius:4px;">
             Filter
         </button>
-        <a href="{% url 'landlords:landlord_property_list' %}"
+        <a href="{% url 'landlords:landlords_browse' %}"
            style="padding:8px 14px; background:gray; color:white; border-radius:4px;
                   text-decoration:none; margin-left:5px;">
            Reset
@@ -64,7 +63,9 @@
                 {% if property.images.all %}
                     <img id="property-img-{{ property.id }}" 
                          src="{{ property.images.all.0.image.url }}" 
-                         style="width:100%; height:100%; object-fit:cover;">
+                         style="width:100%; height:100%; object-fit:cover; cursor:pointer;" 
+                         class="lightbox-trigger" 
+                         data-property-id="{{ property.id }}">
                     {% if property.images.count > 1 %}
                         <button class="prev-btn" style="position:absolute; top:50%; left:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:30px; height:30px;">‹</button>
                         <button class="next-btn" style="position:absolute; top:50%; right:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:30px; height:30px;">›</button>
@@ -84,28 +85,23 @@
             <p><strong>Location:</strong> {{ property.location }}</p>
             <p style="font-size:14px; opacity:0.9;">{{ property.description|truncatewords:20 }}</p>
 
-            <!-- Edit / Delete Buttons -->
-            <div style="margin-top:10px; display:flex; gap:5px;">
-                <a href="{% url 'landlords:landlord_property_update' property.id %}" 
-                   style="flex:1; padding:6px 10px; background:#007bff; color:white; text-align:center; border-radius:4px; text-decoration:none;">
-                   Edit
-                </a>
-
-                <a href="{% url 'landlords:landlord_property_detail' property.id %}" 
-                   style="flex:1; padding:6px 10px; background:#6c757d; color:white; text-align:center; border-radius:4px; text-decoration:none;">
-                   View Details
-                </a>
-                
-                <form method="post" action="{% url 'landlords:landlord_property_delete' property.id %}" style="flex:1;">
-                    {% csrf_token %}
-                    <button type="submit" style="width:100%; padding:6px 10px; background:red; color:white; border:none; border-radius:4px;">
-                        Delete
+            <!-- Favorite / Unfavorite Button for Landlords -->
+            <form method="post" action="{% url 'landlords:favorite_property' property.id %}" class="favorite-form">
+                {% csrf_token %}
+                {% if user.is_authenticated and property.id in favorite_property_ids %}
+                    <button type="submit" data-action="unfavorite" style="background:red; color:white; padding:6px 10px; border:none; border-radius:4px;">
+                        ♥ Unfavorite
                     </button>
-                </form>
-            </div>
+                {% else %}
+                    <button type="submit" data-action="favorite" style="background:#555; color:white; padding:6px 10px; border:none; border-radius:4px;">
+                        ♡ Favorite
+                    </button>
+                {% endif %}
+            </form>
+
         </div>
         {% empty %}
-            <p>No properties found.</p>
+            <p>No properties match your search.</p>
         {% endfor %}
     </div>
 
@@ -126,6 +122,27 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const countySelect = document.getElementById('county-select');
+    const townSelect = document.getElementById('town-select');
+    const ajaxTownsUrl = "{% url 'properties:get_towns_by_county' %}";
+
+    countySelect.addEventListener('change', function() {
+        const selectedCounty = this.value.trim();
+        townSelect.innerHTML = '<option value="">Town/City (Any)</option>';
+        if (!selectedCounty) return;
+
+        fetch(`${ajaxTownsUrl}?county=${encodeURIComponent(selectedCounty)}`)
+            .then(res => res.json())
+            .then(data => {
+                data.towns.forEach(town => {
+                    const option = document.createElement('option');
+                    option.value = town;
+                    option.textContent = town;
+                    townSelect.appendChild(option);
+                });
+            });
+    });
+
     // Property images carousel
     const propertyImages = {
         {% for property in properties %}
@@ -175,6 +192,89 @@ document.addEventListener('DOMContentLoaded', function() {
             if (Math.abs(diff) > 30) { if (diff < 0) nextImage(propertyId); else prevImage(propertyId); }
         });
     });
+
+    // Favorite / unfavorite confirmation modal
+    const modal = document.createElement('div');
+    modal.id = 'confirm-modal';
+    modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;';
+    modal.innerHTML = `
+        <div style="background:white; padding:20px; border-radius:8px; max-width:400px; width:90%; text-align:center;">
+            <p id="confirm-message" style="margin-bottom:20px;">Are you sure?</p>
+            <button id="confirm-yes" style="padding:6px 12px; margin-right:10px; background:#007bff; color:white; border:none; border-radius:4px;">Yes</button>
+            <button id="confirm-no" style="padding:6px 12px; background:#dc3545; color:white; border:none; border-radius:4px;">No</button>
+        </div>`;
+    document.body.appendChild(modal);
+
+    let currentForm = null;
+    const message = document.getElementById('confirm-message');
+    const yesBtn = document.getElementById('confirm-yes');
+    const noBtn = document.getElementById('confirm-no');
+
+    document.querySelectorAll('.favorite-form button').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentForm = this.closest('form');
+            const action = this.dataset.action;
+            message.textContent = action === 'favorite'
+                ? 'Are you sure you want to add this property to your favorites?'
+                : 'Are you sure you want to remove this property from your favorites?';
+            modal.style.display = 'flex';
+        });
+    });
+
+    yesBtn.addEventListener('click', function() { if(currentForm) currentForm.submit(); modal.style.display='none'; });
+    noBtn.addEventListener('click', function() { modal.style.display='none'; currentForm=null; });
+    modal.addEventListener('click', e => { if(e.target===modal){modal.style.display='none'; currentForm=null;} });
+
+    // Lightbox
+    const lightboxModal = document.createElement('div');
+    lightboxModal.id = 'lightbox-modal';
+    lightboxModal.style.cssText = 'display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;z-index:10000;';
+    lightboxModal.innerHTML = `
+        <span id="lightbox-close" style="position:absolute;top:20px;right:30px;font-size:40px;color:white;cursor:pointer;">&times;</span>
+        <img id="lightbox-img" src="" style="max-width:90%; max-height:90%; cursor:grab;">
+        <button id="lightbox-prev" style="position:absolute;top:50%;left:20px;font-size:40px;color:white;background:none;border:none;cursor:pointer;">‹</button>
+        <button id="lightbox-next" style="position:absolute;top:50%;right:20px;font-size:40px;color:white;background:none;border:none;cursor:pointer;">›</button>`;
+    document.body.appendChild(lightboxModal);
+
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxNext = document.getElementById('lightbox-next');
+    const lightboxPrev = document.getElementById('lightbox-prev');
+
+    let currentPropertyId = null;
+    let currentImageIndex = 0;
+
+    document.querySelectorAll('.lightbox-trigger').forEach(img => {
+        img.addEventListener('click', function() {
+            currentPropertyId = this.dataset.propertyId;
+            currentImageIndex = propertyImageIndex[currentPropertyId] || 0;
+            lightboxImg.src = propertyImages[currentPropertyId][currentImageIndex];
+            lightboxImg.style.transform = 'scale(1)';
+            lightboxImg.style.left='0px';
+            lightboxImg.style.top='0px';
+            lightboxModal.style.display = 'flex';
+        });
+    });
+
+    lightboxClose.addEventListener('click', ()=>lightboxModal.style.display='none');
+
+    lightboxNext.addEventListener('click', ()=>{
+        if(!currentPropertyId) return;
+        const imgs = propertyImages[currentPropertyId];
+        currentImageIndex=(currentImageIndex+1)%imgs.length;
+        lightboxImg.src=imgs[currentImageId];
+    });
+
+    lightboxPrev.addEventListener('click', ()=>{
+        if(!currentPropertyId) return;
+        const imgs = propertyImages[currentPropertyId];
+        currentImageIndex=(currentImageIndex-1+imgs.length)%imgs.length;
+        lightboxImg.src=imgs[currentImageIndex];
+    });
+
+    lightboxModal.addEventListener('click', e=>{if(e.target===lightboxModal) lightboxModal.style.display='none';});
+
 });
 </script>
 {% endblock %}

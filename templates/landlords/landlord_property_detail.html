@@ -1,0 +1,158 @@
+<!-- templates/landlords/landlord_property_detail.html-->
+ 
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="max-width:900px; margin:auto; padding:20px;">
+    <h2>{{ property.get_house_type_display }} - {{ property.house_number }}</h2>
+
+    <!-- Image Carousel -->
+    <div class="property-carousel" 
+         style="position:relative; width:100%; height:400px; overflow:hidden; border-radius:8px; margin-bottom:20px;"
+         data-property-id="{{ property.id }}">
+        {% if property.images.all %}
+            <img id="property-img-{{ property.id }}" 
+                 src="{{ property.images.all.0.image.url }}" 
+                 style="width:100%; height:100%; object-fit:cover; cursor:pointer;" 
+                 class="lightbox-trigger" 
+                 data-property-id="{{ property.id }}">
+            {% if property.images.count > 1 %}
+                <button class="prev-btn" style="position:absolute; top:50%; left:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:30px; height:30px;">‹</button>
+                <button class="next-btn" style="position:absolute; top:50%; right:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:30px; height:30px;">›</button>
+            {% endif %}
+        {% else %}
+            <div style="width:100%; height:100%; background:#eee; display:flex; align-items:center; justify-content:center;">
+                <span>No Image</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Property Info -->
+    <p><strong>Rent:</strong> KES {{ property.rent }}</p>
+    <p><strong>County:</strong> {{ property.county }}</p>
+    <p><strong>Town/City:</strong> {{ property.town }}</p>
+    <p><strong>Location:</strong> {{ property.location }}</p>
+    <p style="margin-top:10px;">{{ property.description }}</p>
+
+    <!-- Buttons -->
+    <div style="margin-top:20px; display:flex; gap:10px;">
+        <a href="{% url 'landlords:landlord_property_update' property.id %}" 
+           style="flex:1; padding:8px 12px; background:#007bff; color:white; text-align:center; border-radius:4px; text-decoration:none;">
+           Edit
+        </a>
+        <form method="post" action="{% url 'landlords:landlord_property_delete' property.id %}" style="flex:1;">
+            {% csrf_token %}
+            <button type="submit" style="width:100%; padding:8px 12px; background:red; color:white; border:none; border-radius:4px;">
+                Delete
+            </button>
+        </form>
+        <a href="{% url 'landlords:landlord_property_list' %}" 
+           style="flex:1; padding:8px 12px; background:gray; color:white; text-align:center; border-radius:4px; text-decoration:none;">
+           Back
+        </a>
+    </div>
+</div>
+
+<!-- Carousel & Lightbox JS -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const propertyImages = {
+        {% if property.images.all %}
+            {{ property.id }}: [
+                {% for img in property.images.all %}
+                    "{{ img.image.url }}",
+                {% endfor %}
+            ],
+        {% endif %}
+    };
+    const propertyImageIndex = {};
+
+    function showImage(propertyId, index) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length === 0) return;
+        document.getElementById(`property-img-${propertyId}`).src = imgs[index];
+        propertyImageIndex[propertyId] = index;
+    }
+
+    function nextImage(propertyId) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length <= 1) return;
+        let idx = (propertyImageIndex[propertyId] || 0) + 1;
+        if (idx >= imgs.length) idx = 0;
+        showImage(propertyId, idx);
+    }
+
+    function prevImage(propertyId) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length <= 1) return;
+        let idx = (propertyImageIndex[propertyId] || 0) - 1;
+        if (idx < 0) idx = imgs.length - 1;
+        showImage(propertyId, idx);
+    }
+
+    const carousel = document.querySelector('.property-carousel');
+    if (carousel) {
+        const propertyId = carousel.dataset.propertyId;
+        const prevBtn = carousel.querySelector('.prev-btn');
+        const nextBtn = carousel.querySelector('.next-btn');
+        if (prevBtn) prevBtn.addEventListener('click', () => prevImage(propertyId));
+        if (nextBtn) nextBtn.addEventListener('click', () => nextImage(propertyId));
+
+        let startX = 0;
+        carousel.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+        carousel.addEventListener('touchend', e => {
+            const diff = e.changedTouches[0].clientX - startX;
+            if (Math.abs(diff) > 30) { if (diff < 0) nextImage(propertyId); else prevImage(propertyId); }
+        });
+    }
+
+    // Lightbox
+    const lightboxModal = document.createElement('div');
+    lightboxModal.id = 'lightbox-modal';
+    lightboxModal.style.cssText = 'display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;z-index:10000;';
+    lightboxModal.innerHTML = `
+        <span id="lightbox-close" style="position:absolute;top:20px;right:30px;font-size:40px;color:white;cursor:pointer;">&times;</span>
+        <img id="lightbox-img" src="" style="max-width:90%; max-height:90%; cursor:grab;">
+        <button id="lightbox-prev" style="position:absolute;top:50%;left:20px;font-size:40px;color:white;background:none;border:none;cursor:pointer;">‹</button>
+        <button id="lightbox-next" style="position:absolute;top:50%;right:20px;font-size:40px;color:white;background:none;border:none;cursor:pointer;">›</button>`;
+    document.body.appendChild(lightboxModal);
+
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxNext = document.getElementById('lightbox-next');
+    const lightboxPrev = document.getElementById('lightbox-prev');
+
+    let currentPropertyId = null;
+    let currentImageIndex = 0;
+
+    document.querySelectorAll('.lightbox-trigger').forEach(img => {
+        img.addEventListener('click', function() {
+            currentPropertyId = this.dataset.propertyId;
+            currentImageIndex = propertyImageIndex[currentPropertyId] || 0;
+            lightboxImg.src = propertyImages[currentPropertyId][currentImageIndex];
+            lightboxImg.style.transform = 'scale(1)';
+            lightboxImg.style.left='0px';
+            lightboxImg.style.top='0px';
+            lightboxModal.style.display = 'flex';
+        });
+    });
+
+    lightboxClose.addEventListener('click', () => lightboxModal.style.display = 'none');
+    lightboxNext.addEventListener('click', () => {
+        if(!currentPropertyId) return;
+        const imgs = propertyImages[currentPropertyId];
+        currentImageIndex=(currentImageIndex+1)%imgs.length;
+        lightboxImg.src=imgs[currentImageIndex];
+    });
+    lightboxPrev.addEventListener('click', () => {
+        if(!currentPropertyId) return;
+        const imgs = propertyImages[currentPropertyId];
+        currentImageIndex=(currentImageIndex-1+imgs.length)%imgs.length;
+        lightboxImg.src=imgs[currentImageIndex];
+    });
+    lightboxModal.addEventListener('click', e => { if(e.target===lightboxModal) lightboxModal.style.display='none'; });
+
+});
+</script>
+{% endblock %}
