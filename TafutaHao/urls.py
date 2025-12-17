@@ -47,7 +47,5 @@ urlpatterns = [
     path('no-permission/', no_permission_view, name='no_permission'),
 ]
 
-
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

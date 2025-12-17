@@ -8,6 +8,6 @@ def landlord_required(view_func):
     @login_required
     def wrapper(request, *args, **kwargs):
         if not request.user.is_landlord():
-            return redirect('no_permission')  # we will create this page
+            return redirect('no_permission')  # will create this page
         return view_func(request, *args, **kwargs)
     return wrapper

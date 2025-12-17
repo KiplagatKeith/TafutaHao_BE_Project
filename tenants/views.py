@@ -16,7 +16,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.forms import CustomUserCreationForm
 from django.views.generic.edit import CreateView
 from properties.constants import KENYA_COUNTIES
-
 # -------------------------
 # Browse Properties with Pagination and Search/Filter
 # -------------------------
@@ -150,3 +149,13 @@ class TenantProfileView(View):
             'favorite_properties': favorite_properties,
         }
         return render(request, self.template_name, context)
+
+class RequestViewingView(LoginRequiredMixin, View):
+    def get(self, request, property_id):
+        property_obj = get_object_or_404(Property, id=property_id)
+
+        # You can implement your "request viewing" logic here,
+        # e.g., send email to landlord or create a Request model
+        messages.success(request, f"You have requested a viewing for {property_obj.get_house_type_display} - {property_obj.house_number}")
+
+        return redirect('properties:property_detail', pk=property_id)
