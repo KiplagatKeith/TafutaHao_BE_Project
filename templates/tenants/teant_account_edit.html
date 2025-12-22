@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width:500px; margin:auto;">
+    <h2>Edit Tenant Account</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit"
+                style="padding:8px 14px; background:black; color:white; border:none;">
+            Save Changes
+        </button>
+    </form>
+
+    <hr>
+
+    <a href="{% url 'tenants:tenant_profile_delete' %}"
+       style="color:red; text-decoration:none;">
+        Delete Profile
+    </a>
+</div>
+{% endblock %}

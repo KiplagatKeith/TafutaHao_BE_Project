@@ -2,7 +2,7 @@
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
-from django.views.generic import ListView, FormView, DeleteView
+from django.views.generic import ListView, FormView, DeleteView, UpdateView
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
 from django.contrib import messages
@@ -16,6 +16,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.forms import CustomUserCreationForm
 from django.views.generic.edit import CreateView
 from properties.constants import KENYA_COUNTIES
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 # -------------------------
 # Browse Properties with Pagination and Search/Filter
 # -------------------------
@@ -159,3 +163,49 @@ class RequestViewingView(LoginRequiredMixin, View):
         messages.success(request, f"You have requested a viewing for {property_obj.get_house_type_display} - {property_obj.house_number}")
 
         return redirect('properties:property_detail', pk=property_id)
+
+# Update Tenant Account
+class TenantAccountUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    template_name = 'tenants/tenant_account_edit.html'
+    fields = ['username', 'email', 'phone_number']
+
+    def get_object(self):
+        # Tenant can ONLY edit their own user account
+        return self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, "Your account has been updated successfully!")
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('tenants:tenant_profile')
+    
+# Delete Tenant Acc
+class TenantProfileDeleteView(LoginRequiredMixin, DeleteView):
+    model = TenantProfile
+    template_name = 'shared/confirm_delete.html'
+    success_url = reverse_lazy('tenants:browse_properties')
+
+    def get_object(self):
+        return TenantProfile.objects.get(user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_name'] = 'your tenant profile'
+        context['cancel_url'] = reverse_lazy('tenants:tenant_account_edit')
+        return context
+
+    def delete(self, request, *args, **kwargs):
+        # Get TenantProfile and related User
+        tenant_profile = self.get_object()
+        user = tenant_profile.user
+
+        # Log out BEFORE deleting
+        logout(request)
+
+        # Delete User (this cascades to TenantProfile if using OneToOne)
+        user.delete()
+
+        # Redirect to a safe page
+        return super(DeleteView, self).delete(request, *args, **kwargs)

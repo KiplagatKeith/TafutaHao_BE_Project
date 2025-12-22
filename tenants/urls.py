@@ -1,7 +1,14 @@
 # tenants/urls.py
 
 from django.urls import path
-from .views import BrowsePropertiesView, FavoritePropertyView, FavoritePropertyDeleteView, TenantProfileView, RequestViewingView
+from .views import (BrowsePropertiesView, 
+                    FavoritePropertyView, 
+                    FavoritePropertyDeleteView, 
+                    TenantProfileView, 
+                    RequestViewingView,
+                    TenantAccountUpdateView,
+                    TenantProfileDeleteView,
+)
 
 
 app_name = 'tenants'
@@ -13,4 +20,7 @@ urlpatterns = [
     path('profile/', TenantProfileView.as_view(), name='tenant_profile'),
 
     path('request-viewing/<int:property_id>/', RequestViewingView.as_view(), name='request_viewing'),
+
+    path('account/edit/', TenantAccountUpdateView.as_view(), name='tenant_account_edit'),
+    path('profile/delete/', TenantProfileDeleteView.as_view(), name='tenant_profile_delete'),
 ]
