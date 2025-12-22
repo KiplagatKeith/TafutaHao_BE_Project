@@ -2,19 +2,15 @@
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
-from django.views.generic import ListView, FormView, DeleteView, UpdateView
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.views.generic import ListView, DeleteView, UpdateView
 from django.contrib.auth import login, logout
 from django.contrib import messages
 from properties.models import Property
-from .models import TenantProfile, FavoriteProperty
-from accounts.models import CustomUser
+from .models import FavoriteProperty
 from django.urls import reverse_lazy
 from django.db.models import Q
 from .models import FavoriteProperty
 from django.contrib.auth.mixins import LoginRequiredMixin
-from accounts.forms import CustomUserCreationForm
-from django.views.generic.edit import CreateView
 from properties.constants import KENYA_COUNTIES
 from django.contrib.auth import get_user_model
 
@@ -104,7 +100,11 @@ class FavoritePropertyView(View):
             messages.error(request, "You need to login to favorite properties.")
             return redirect('login')
 
-        tenant_profile, _ = TenantProfile.objects.get_or_create(user=request.user)
+        tenant_profile = getattr(request.user, 'tenantprofile', None)
+        if not tenant_profile:
+            messages.error(request, "You need a tenant account to favorite properties.")
+            return redirect('login')
+        
         property_obj = get_object_or_404(Property, id=property_id)
 
         favorite = FavoriteProperty.objects.filter(tenant=tenant_profile, property=property_obj).first()
@@ -145,7 +145,11 @@ class TenantProfileView(View):
             messages.error(request, "You need to login to view your profile.")
             return redirect('login')
 
-        tenant_profile, _ = TenantProfile.objects.get_or_create(user=request.user)
+        tenant_profile = getattr(request.user, 'tenantprofile', None)
+        if not tenant_profile:
+            messages.error(request, "Tenant profile not found.")
+            return redirect('login')
+    
         favorite_properties = tenant_profile.favoriteproperty_set.select_related('property').all()
 
         context = {
@@ -182,30 +186,16 @@ class TenantAccountUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('tenants:tenant_profile')
     
 # Delete Tenant Acc
-class TenantProfileDeleteView(LoginRequiredMixin, DeleteView):
-    model = TenantProfile
-    template_name = 'shared/confirm_delete.html'
-    success_url = reverse_lazy('tenants:browse_properties')
+class TenantProfileDeleteView(LoginRequiredMixin, View):
+    def post(self, request):
+        user = request.user
 
-    def get_object(self):
-        return TenantProfile.objects.get(user=self.request.user)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['object_name'] = 'your tenant profile'
-        context['cancel_url'] = reverse_lazy('tenants:tenant_account_edit')
-        return context
-
-    def delete(self, request, *args, **kwargs):
-        # Get TenantProfile and related User
-        tenant_profile = self.get_object()
-        user = tenant_profile.user
-
-        # Log out BEFORE deleting
+        # Log out and destroy session completely
         logout(request)
+        request.session.flush()
 
-        # Delete User (this cascades to TenantProfile if using OneToOne)
+        # Delete user (cascades to TenantProfile)
         user.delete()
 
-        # Redirect to a safe page
-        return super(DeleteView, self).delete(request, *args, **kwargs)
+        messages.success(request, "Your account has been deleted successfully.")
+        return redirect('tenants:browse_properties')
