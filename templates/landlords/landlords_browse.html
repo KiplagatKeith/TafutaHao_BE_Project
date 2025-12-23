@@ -99,6 +99,13 @@
                 {% endif %}
             </form>
 
+            <!-- View Details Button -->
+            <a href="{% url 'properties:property_detail' property.id %}" 
+               class="view-details-btn"
+               style="display:block; padding:6px 10px; background:#6c757d; color:white; text-align:center; border-radius:4px; text-decoration:none; margin-top:5px;">
+               View Details
+            </a>
+
         </div>
         {% empty %}
             <p>No properties match your search.</p>

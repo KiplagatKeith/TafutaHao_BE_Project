@@ -16,7 +16,12 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from properties.constants import KENYA_COUNTIES  # same constant used for dropdown 
 from django.views import View
-
+from accounts.models import CustomUser
+from django.contrib.auth.mixins import UserPassesTestMixin
+from .forms import LandlordAccountForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import logout
+from django.contrib import messages
 # =========================
 # List properties for landlord
 # =========================
@@ -212,18 +217,62 @@ class LandlordDashboardView(LoginRequiredMixin, LandlordRequiredMixin, TemplateV
         landlord_profile = getattr(self.request.user, 'landlordprofile', None)
 
         if landlord_profile:
+            # Get all landlord's properties
             properties_list = landlord_profile.property_set.all()
-            context['total_properties'] = properties_list.count()
-            context['available_properties'] = properties_list.filter(available=True).count()
 
-            # Paginate properties (6 per page)
+            # ---- APPLY FILTERS ----
+            q = self.request.GET.get('q', '').strip()
+            min_rent = self.request.GET.get('min_rent')
+            max_rent = self.request.GET.get('max_rent')
+            county = self.request.GET.get('county', '').strip()
+            town = self.request.GET.get('town', '').strip()
+            location = self.request.GET.get('location', '').strip()
+            house_type = self.request.GET.get('house_type', '').strip()
+
+            if q:
+                properties_list = properties_list.filter(
+                    Q(description__icontains=q) | Q(house_number__icontains=q)
+                )
+            if min_rent:
+                properties_list = properties_list.filter(rent__gte=min_rent)
+            if max_rent:
+                properties_list = properties_list.filter(rent__lte=max_rent)
+            if county:
+                properties_list = properties_list.filter(county__iexact=county)
+            if town:
+                properties_list = properties_list.filter(town__iexact=town)
+            if location:
+                properties_list = properties_list.filter(location__icontains=location)
+            if house_type:
+                properties_list = properties_list.filter(house_type=house_type)
+
+            # ---- Paginate (6 per page) ----
             paginator = Paginator(properties_list, 6)
             page_number = self.request.GET.get('page')
             context['properties'] = paginator.get_page(page_number)
+
+            # ---- Summary info ----
+            context['total_properties'] = landlord_profile.property_set.count()
+            context['available_properties'] = landlord_profile.property_set.filter(available=True).count()
+
+            # ---- Persist filter values for form ----
+            context.update({
+                'search_query': q,
+                'min_rent': min_rent or '',
+                'max_rent': max_rent or '',
+                'county': county,
+                'town': town,
+                'location': location,
+                'house_type': house_type,
+                'counties': properties_list.values_list('county', flat=True).distinct(),
+                'towns': properties_list.values_list('town', flat=True).distinct(),
+            })
         else:
             context['total_properties'] = 0
             context['available_properties'] = 0
             context['properties'] = []
+            context['counties'] = []
+            context['towns'] = []
 
         return context
 
@@ -354,3 +403,55 @@ class LandlordPropertyDetailView(LoginRequiredMixin, LandlordRequiredMixin, Deta
     def get_queryset(self):
         # Only allow the landlord to view their own properties
         return Property.objects.filter(landlord__user=self.request.user)
+    
+class LandlordAccountUpdateView(LoginRequiredMixin, UpdateView):
+    model = CustomUser
+    form_class = LandlordAccountForm
+    template_name = 'landlords/landlord_account_form.html'
+    success_url = reverse_lazy('landlords:landlord_dashboard')
+
+    # get_object already returns the logged-in user
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        password = form.cleaned_data.get("password1")
+        if password:
+            update_session_auth_hash(self.request, self.object)
+        return response
+
+    
+class LandlordAccountDeleteView(LoginRequiredMixin, View):
+    def post(self, request):
+        user = request.user
+
+        # Log out and destroy session
+        logout(request)
+        request.session.flush()
+
+        # Delete user (cascades to LandlordProfile, properties, images, favorites)
+        user.delete()
+
+        messages.success(request, "Your account and all your properties have been deleted successfully.")
+        return redirect('home')  # or any page you want
+
+class LandlordProfileView(LoginRequiredMixin, TemplateView):
+    template_name = 'landlords/landlord_profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        # Landlord profile
+        landlord_profile = getattr(user, 'landlordprofile', None)
+        context['landlord_profile'] = landlord_profile
+
+        # Favorite properties by this landlord
+        if landlord_profile:
+            favorites = LandlordFavoriteProperty.objects.filter(landlord=landlord_profile).select_related('property')
+            context['favorite_properties'] = [fav.property for fav in favorites]
+        else:
+            context['favorite_properties'] = []
+
+        return context

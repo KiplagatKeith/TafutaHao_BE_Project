@@ -3,7 +3,8 @@
 from django import forms
 from properties.models import Property
 from properties.constants import KENYA_COUNTIES
-
+from django.contrib.auth.forms import PasswordChangeForm
+from accounts.models import CustomUser
 
 # Custom widget to allow multiple file uploads
 class MultiFileInput(forms.ClearableFileInput):
@@ -46,3 +47,37 @@ class PropertyForm(forms.ModelForm):
             'available': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
+class LandlordAccountForm(forms.ModelForm):
+    password1 = forms.CharField(
+        label="New Password",
+        widget=forms.PasswordInput,
+        required=False,
+        help_text="Leave blank if you don't want to change the password"
+    )
+    password2 = forms.CharField(
+        label="Confirm New Password",
+        widget=forms.PasswordInput,
+        required=False
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'email', 'phone_number']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
+        if password1 or password2:
+            if password1 != password2:
+                raise forms.ValidationError("Passwords do not match")
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        password = self.cleaned_data.get("password1")
+        if password:
+            user.set_password(password)
+        if commit:
+            user.save()
+        return user

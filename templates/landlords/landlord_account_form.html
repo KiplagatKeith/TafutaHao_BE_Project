@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 40px auto; font-family: Arial, sans-serif;">
+
+    <h2 style="margin-bottom: 20px; color: #333;">Edit Account</h2>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <!-- Username -->
+        <div style="margin-bottom: 15px;">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {{ form.username.errors }}
+        </div>
+
+        <!-- Email -->
+        <div style="margin-bottom: 15px;">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {{ form.email.errors }}
+        </div>
+
+        <!-- Phone number -->
+        <div style="margin-bottom: 15px;">
+            {{ form.phone_number.label_tag }}
+            {{ form.phone_number }}
+            {{ form.phone_number.errors }}
+        </div>
+
+        <!-- New password -->
+        <div style="margin-bottom: 15px;">
+            {{ form.password1.label_tag }}
+            {{ form.password1 }}
+            {{ form.password1.errors }}
+        </div>
+
+        <!-- Confirm password -->
+        <div style="margin-bottom: 15px;">
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+            {{ form.password2.errors }}
+        </div>
+
+        <button type="submit" 
+                style="background: #007bff; color: white; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer;">
+            Save Changes
+        </button>
+
+        <a href="{% url 'landlords:landlord_profile' %}" 
+           style="margin-left: 10px; color: #555; text-decoration: underline;">
+           Cancel
+        </a>
+    </form>
+</div>
+{% endblock %}

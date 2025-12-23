@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div style="max-width:1000px; margin:auto; padding:30px; font-family:Arial, sans-serif;">
+
+    <!-- PROFILE HEADER -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+        <h1 style="font-size:28px; color:#333;">{{ landlord_profile.user.username }}'s Profile</h1>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            
+            <!-- Edit Account -->
+           <a href="{% url 'landlords:landlord_account_edit' %}"
+               style="padding:10px 16px; background:#007bff; color:white; text-decoration:none; border-radius:6px; font-weight:bold; transition:0.3s;">
+                Edit Account
+            </a>
+
+            <!-- Delete Account -->
+            <form id="delete-account-form" method="post" action="{% url 'landlords:landlord_account_delete' %}"
+                  onsubmit="return confirm('Are you sure you want to permanently delete your account and all your properties?');">
+                {% csrf_token %}
+                <button type="submit" style="padding:10px 16px; background:#ff4d4f; color:white; border:none; border-radius:6px; font-weight:bold;">Delete Account</button>
+            </form>
+        </div>
+    </div>
+
+    <hr style="margin:25px 0; border:1px solid #eee;">
+
+    <!-- ACCOUNT DETAILS CARD -->
+    <div style="background:#f9f9f9; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-bottom:30px;">
+        <h2 style="font-size:22px; color:#555; margin-bottom:15px;">Account Details</h2>
+
+        <p><strong>Username:</strong> <span style="color:#333;">{{ landlord_profile.user.username }}</span></p>
+        <p><strong>Email:</strong> <span style="color:#333;">{{ landlord_profile.user.email }}</span></p>
+        {% if landlord_profile.user.phone_number %}
+            <p><strong>Phone:</strong> <span style="color:#333;">{{ landlord_profile.user.phone_number }}</span></p>
+        {% endif %}
+    </div>
+
+    <!-- FAVORITE PROPERTIES -->
+    <h2 style="font-size:22px; color:#555; margin-bottom:15px;">Favorite Properties</h2>
+
+    <div class="favorite-properties"
+         style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:20px;">
+        
+        {% for fav in favorite_properties %}
+            <div class="property-card"
+                 style="border:1px solid #ddd; border-radius:10px; overflow:hidden; background:white; box-shadow:0 3px 8px rgba(0,0,0,0.1); transition:transform 0.2s; cursor:pointer;"
+                 onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+
+                <!-- Image Carousel -->
+                <div class="property-carousel" style="position:relative; width:100%; height:180px; overflow:hidden; border-radius:6px;" data-property-id="{{ fav.id }}">
+                    {% if fav.images.all %}
+                        <img id="property-img-{{ fav.id }}"
+                             src="{{ fav.images.all.0.image.url }}"
+                             style="width:100%; height:100%; object-fit:cover;"
+                             class="lightbox-trigger"
+                             data-property-id="{{ fav.id }}">
+                        {% if fav.images.count > 1 %}
+                            <button class="prev-btn" style="position:absolute; top:50%; left:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:30px; height:30px;">‹</button>
+                            <button class="next-btn" style="position:absolute; top:50%; right:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:30px; height:30px;">›</button>
+                        {% endif %}
+                    {% else %}
+                        <div style="width:100%; height:100%; background:#eee; display:flex; align-items:center; justify-content:center;">
+                            <span>No Image</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Property Info -->
+                <div style="padding:15px;">
+                    <h3 style="font-size:18px; color:#222; margin-bottom:8px;">
+                        {{ fav.get_house_type_display }} - {{ fav.house_number }}
+                    </h3>
+
+                    <p style="font-size:14px; color:#666; margin-bottom:10px;">
+                        {{ fav.description|truncatewords:18 }}
+                    </p>
+
+                    <p style="font-size:14px; color:#444; margin-bottom:10px;">
+                        <strong>Location:</strong> {{ fav.location }}<br>
+                        <strong>Rent:</strong> KES {{ fav.rent }}
+                    </p>
+
+                    <!-- Remove Favorite Button -->
+                    <form method="post" action="{% url 'landlords:favorite_property' fav.id %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                style="width:100%; padding:8px 0; background:#ff4d4f; color:white; border:none; border-radius:6px; font-weight:bold; transition:0.3s;">
+                            Remove Favorite
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% empty %}
+            <p style="color:#777;">You have no favorite properties yet.</p>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- Carousel & Lightbox JS (reuse tenant JS) -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const propertyImages = {
+        {% for fav in favorite_properties %}
+            {{ fav.id }}: [
+                {% for img in fav.images.all %}
+                    "{{ img.image.url }}",
+                {% endfor %}
+            ],
+        {% endfor %}
+    };
+    const propertyImageIndex = {};
+
+    function showImage(propertyId, index) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length === 0) return;
+        document.getElementById(`property-img-${propertyId}`).src = imgs[index];
+        propertyImageIndex[propertyId] = index;
+    }
+
+    function nextImage(propertyId) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length <= 1) return;
+        let idx = (propertyImageIndex[propertyId] || 0) + 1;
+        if (idx >= imgs.length) idx = 0;
+        showImage(propertyId, idx);
+    }
+
+    function prevImage(propertyId) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length <= 1) return;
+        let idx = (propertyImageIndex[propertyId] || 0) - 1;
+        if (idx < 0) idx = imgs.length - 1;
+        showImage(propertyId, idx);
+    }
+
+    document.querySelectorAll('.property-carousel').forEach(carousel => {
+        const propertyId = carousel.dataset.propertyId;
+        const prevBtn = carousel.querySelector('.prev-btn');
+        const nextBtn = carousel.querySelector('.next-btn');
+        if (prevBtn) prevBtn.addEventListener('click', () => prevImage(propertyId));
+        if (nextBtn) nextBtn.addEventListener('click', () => nextImage(propertyId));
+    });
+});
+</script>
+
+{% endblock %}

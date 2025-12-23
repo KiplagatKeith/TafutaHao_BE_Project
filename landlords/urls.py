@@ -25,4 +25,14 @@ urlpatterns = [
 
     # Favorite / Unfavorite Property
     path('favorite/<int:property_id>/', views.LandlordFavoritePropertyView.as_view(), name='favorite_property'),
+
+    # Landlord profile page
+    path('account/profile/', views.LandlordProfileView.as_view(), name='landlord_profile'),
+
+    # Landlord Account Management(edit profile, change password, delete account)
+    path('account/edit/', views.LandlordAccountUpdateView.as_view(), name='landlord_account_edit'),
+
+    # Delete Landlord Account
+    path('account/delete/', views.LandlordAccountDeleteView.as_view(), name='landlord_account_delete'),
+
 ]

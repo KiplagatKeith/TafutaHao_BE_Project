@@ -41,125 +41,277 @@
                 My Properties
             </a>
 
+            <a href="{% url 'landlords:landlord_profile' %}" 
+               style="padding:10px 20px; background:#28a745; color:white; border-radius:4px; text-decoration:none;">
+               My Profile
+            </a>
+
         </div>
 
     </div>
     
 
     <!-- Filter/Search Form -->
-    <form method="get" style="margin: 15px 0; display:flex; flex-wrap: wrap; gap:10px;">
-        <input type="text" name="q" placeholder="Search (house number, location)" 
-               value="{{ request.GET.q }}" style="flex:2; padding:8px;">
+    <form method="get" class="filter-form" style="margin:15px 0; display:flex; flex-wrap:wrap; gap:10px;">
+        <input type="text" name="q" placeholder="Search (description or house number)" 
+               value="{{ search_query }}" style="flex:2; padding:8px;">
+        <input type="number" name="min_rent" placeholder="Min Rent" value="{{ min_rent }}" style="flex:1; padding:8px;">
+        <input type="number" name="max_rent" placeholder="Max Rent" value="{{ max_rent }}" style="flex:1; padding:8px;">
+        <select name="county" style="flex:1; padding:8px;">
+            <option value="">County (Any)</option>
+            {% for c in counties %}
+                <option value="{{ c }}" {% if c == county %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+        <select name="town" style="flex:1; padding:8px;">
+            <option value="">Town/City (Any)</option>
+            {% for t in towns %}
+                <option value="{{ t }}" {% if t == town %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="location" placeholder="Location" value="{{ location }}" style="flex:1; padding:8px;">
         <select name="house_type" style="flex:1; padding:8px;">
             <option value="">House Type (Any)</option>
-            <option value="single" {% if request.GET.house_type == "single" %}selected{% endif %}>Single Room</option>
-            <option value="bedsitter" {% if request.GET.house_type == "bedsitter" %}selected{% endif %}>Bedsitter</option>
-            <option value="1BR" {% if request.GET.house_type == "1BR" %}selected{% endif %}>One Bedroom</option>
-            <option value="2BR" {% if request.GET.house_type == "2BR" %}selected{% endif %}>Two Bedroom</option>
-            <option value="3BR" {% if request.GET.house_type == "3BR" %}selected{% endif %}>Three Bedroom</option>
-            <option value="shared" {% if request.GET.house_type == "shared" %}selected{% endif %}>Shared Unit</option>
-        </select>
-        <select name="available" style="flex:1; padding:8px;">
-            <option value="">Availability (Any)</option>
-            <option value="true" {% if request.GET.available == "true" %}selected{% endif %}>Available</option>
-            <option value="false" {% if request.GET.available == "false" %}selected{% endif %}>Not Available</option>
+            <option value="single" {% if house_type == "single" %}selected{% endif %}>Single Room</option>
+            <option value="bedsitter" {% if house_type == "bedsitter" %}selected{% endif %}>Bedsitter</option>
+            <option value="1BR" {% if house_type == "1BR" %}selected{% endif %}>One Bedroom</option>
+            <option value="2BR" {% if house_type == "2BR" %}selected{% endif %}>Two Bedroom</option>
+            <option value="3BR" {% if house_type == "3BR" %}selected{% endif %}>Three Bedroom</option>
+            <option value="shared" {% if house_type == "shared" %}selected{% endif %}>Shared Unit</option>
         </select>
         <button type="submit" style="padding:8px 14px; background:black; color:white; border-radius:4px;">Filter</button>
+        <a href="{% url 'landlords:landlord_dashboard' %}" style="padding:8px 14px; background:gray; color:white; border-radius:4px; text-decoration:none; margin-left:5px;">Reset</a>
     </form>
 
     <!-- Properties Table -->
-    <div style="overflow-x:auto;">
-        <table style="width:100%; border-collapse:collapse;">
-            <thead>
-                <tr style="border-bottom:2px solid #ddd; text-align:left;">
-                    <th style="padding:8px;">House Type</th>
-                    <th style="padding:8px;">House Number</th>
-                    <th style="padding:8px;">Rent (KES)</th>
-                    <th style="padding:8px;">Location</th>
-                    <th style="padding:8px;">Available</th>
-                    <th style="padding:8px;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for property in properties %}
-                <tr id="property-row-{{ property.id }}" style="border-bottom:1px solid #eee;">
-                    <td style="padding:8px;">{{ property.get_house_type_display }}</td>
-                    <td style="padding:8px;">{{ property.house_number }}</td>
-                    <td style="padding:8px;">{{ property.rent }}</td>
-                    <td style="padding:8px;">{{ property.location }}</td>
-                    <td style="padding:8px;">{% if property.available %}Yes{% else %}No{% endif %}</td>
-                    <td style="padding:8px;">
-                        <a href="{% url 'landlords:landlord_property_update' property.id %}" style="margin-right:5px; padding:4px 8px; background:#555; color:white; border-radius:4px; text-decoration:none;">Edit</a>
-                        <button onclick="deleteProperty({{ property.id }})" 
-                                style="padding:4px 8px; background:red; color:white; border-radius:4px; border:none; cursor:pointer;">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" style="padding:8px; text-align:center;">You have no properties yet.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Property Cards Grid -->
+    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap:15px; margin-top:25px;">
+        {% for property in properties %}
+        <div style="border:1px solid #ddd; padding:15px; border-radius:8px; transition: transform 0.2s;"
+             onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
 
-        <!-- Pagination -->
-        {% if properties.has_other_pages %}
-        <div style="margin-top: 15px; text-align:center;">
-            {% if properties.has_previous %}
-                <a href="?page={{ properties.previous_page_number }}" style="margin-right:10px;">« Previous</a>
-            {% endif %}
-        
-            Page {{ properties.number }} of {{ properties.paginator.num_pages }}
-        
-            {% if properties.has_next %}
-                <a href="?page={{ properties.next_page_number }}" style="margin-left:10px;">Next »</a>
-            {% endif %}
+            <!-- Image Carousel -->
+            <div class="property-carousel"
+                 style="position:relative; width:100%; height:180px; overflow:hidden; border-radius:6px;"
+                 data-property-id="{{ property.id }}">
+                {% if property.images.all %}
+                    <img id="property-img-{{ property.id }}"
+                        src="{{ property.images.all.0.image.url }}"
+                        style="width:100%; height:100%; object-fit:cover; cursor:pointer;"
+                        class="lightbox-trigger"
+                        data-property-id="{{ property.id }}">
+                    {% if property.images.count > 1 %}
+                        <button class="prev-btn" style="position:absolute; top:50%; left:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:30px; height:30px;">‹</button>
+                        <button class="next-btn" style="position:absolute; top:50%; right:5px; transform:translateY(-50%); background:rgba(0,0,0,0.5); color:white; border:none; border-radius:50%; width:30px; height:30px;">›</button>
+                    {% endif %}
+                {% else %}
+                    <div style="width:100%; height:100%; background:#eee; display:flex; align-items:center; justify-content:center;">
+                        <span>No Image</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Property Info -->
+            <h4 style="margin-top:10px;">{{ property.get_house_type_display }} - {{ property.house_number }}</h4>
+            <p><strong>Rent:</strong> KES {{ property.rent }}</p>
+            <p><strong>County:</strong> {{ property.county }}</p>
+            <p><strong>Town/City:</strong> {{ property.town }}</p>
+            <p><strong>Location:</strong> {{ property.location }}</p>
+            <p style="font-size:14px; opacity:0.9;">{{ property.description|truncatewords:20 }}</p>
+
+            <!-- Edit / View / Delete Buttons -->
+            <div style="margin-top:10px; display:flex; gap:5px;">
+                <a href="{% url 'landlords:landlord_property_update' property.id %}"
+                   style="flex:1; padding:6px 10px; background:#007bff; color:white; text-align:center; border-radius:4px; text-decoration:none;">
+                   Edit
+                </a>
+
+                <a href="{% url 'landlords:landlord_property_detail' property.id %}"
+                   style="flex:1; padding:6px 10px; background:#6c757d; color:white; text-align:center; border-radius:4px; text-decoration:none;">
+                   View Details
+                </a>
+
+                <form method="post" action="{% url 'landlords:landlord_property_delete' property.id %}" style="flex:1;">
+                    {% csrf_token %}
+                    <button type="submit" style="width:100%; padding:6px 10px; background:red; color:white; border:none; border-radius:4px;">
+                        Delete
+                    </button>
+                </form>
+            </div>
         </div>
-        {% endif %}
-        
+        {% empty %}
+            <p style="grid-column:1/-1; text-align:center;">No properties found.</p>
+        {% endfor %}
     </div>
+
+    <!-- Pagination (Preserves Filters) -->
+    {% if properties.has_other_pages %}
+    <div style="margin-top:15px; text-align:center;">
+        {% if properties.has_previous %}
+            <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ properties.previous_page_number }}" style="margin-right:10px;">« Previous</a>
+        {% endif %}
+
+        Page {{ properties.number }} of {{ properties.paginator.num_pages }}
+
+        {% if properties.has_next %}
+            <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ properties.next_page_number }}" style="margin-left:10px;">Next »</a>
+        {% endif %}
+    </div>
+    {% endif %}
 
 </div>
 
 <script>
-// CSRF helper for AJAX
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+document.addEventListener('DOMContentLoaded', function() {
+    // ------------------------------
+    // CSRF helper for AJAX
+    // ------------------------------
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
         }
+        return cookieValue;
     }
-    return cookieValue;
-}
 
-function deleteProperty(propertyId) {
-    if (confirm('Are you sure you want to delete this property?')) {
-        fetch(`/landlord/delete/${propertyId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Accept': 'application/json',
-            },
-        })
-        .then(response => {
-            if (response.ok) {
-                // remove the deleted property row from the table
-                document.querySelector(`#property-row-${propertyId}`).remove();
-                alert('Property deleted successfully!');
-            } else {
-                alert('Failed to delete property.');
+    // ------------------------------
+    // Delete property function
+    // ------------------------------
+    function deleteProperty(propertyId) {
+        if (confirm('Are you sure you want to delete this property?')) {
+            fetch(`/landlord/delete/${propertyId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Accept': 'application/json',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    const row = document.querySelector(`#property-row-${propertyId}`);
+                    if (row) row.remove();
+                    alert('Property deleted successfully!');
+                } else {
+                    alert('Failed to delete property.');
+                }
+            });
+        }
+    }
+
+    // ------------------------------
+    // Property images carousel
+    // ------------------------------
+    const propertyImages = {
+        {% for property in properties %}
+            {{ property.id }}: [
+                {% for img in property.images.all %}
+                    "{{ img.image.url }}",
+                {% endfor %}
+            ],
+        {% endfor %}
+    };
+    const propertyImageIndex = {};
+
+    function showImage(propertyId, index) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length === 0) return;
+        document.getElementById(`property-img-${propertyId}`).src = imgs[index];
+        propertyImageIndex[propertyId] = index;
+    }
+
+    function nextImage(propertyId) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length <= 1) return;
+        let idx = (propertyImageIndex[propertyId] || 0) + 1;
+        if (idx >= imgs.length) idx = 0;
+        showImage(propertyId, idx);
+    }
+
+    function prevImage(propertyId) {
+        const imgs = propertyImages[propertyId];
+        if (!imgs || imgs.length <= 1) return;
+        let idx = (propertyImageIndex[propertyId] || 0) - 1;
+        if (idx < 0) idx = imgs.length - 1;
+        showImage(propertyId, idx);
+    }
+
+    document.querySelectorAll('.property-carousel').forEach(carousel => {
+        const propertyId = carousel.dataset.propertyId;
+        const prevBtn = carousel.querySelector('.prev-btn');
+        const nextBtn = carousel.querySelector('.next-btn');
+        if (prevBtn) prevBtn.addEventListener('click', () => prevImage(propertyId));
+        if (nextBtn) nextBtn.addEventListener('click', () => nextImage(propertyId));
+
+        // Touch swipe support
+        let startX = 0;
+        carousel.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+        carousel.addEventListener('touchend', e => {
+            const diff = e.changedTouches[0].clientX - startX;
+            if (Math.abs(diff) > 30) {
+                if (diff < 0) nextImage(propertyId);
+                else prevImage(propertyId);
             }
         });
-    }
-}
+    });
+
+    // ------------------------------
+    // Lightbox modal for full-size image
+    // ------------------------------
+    const lightboxModal = document.createElement('div');
+    lightboxModal.id = 'lightbox-modal';
+    lightboxModal.style.cssText = 'display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;z-index:10000;';
+    lightboxModal.innerHTML = `
+        <span id="lightbox-close" style="position:absolute;top:20px;right:30px;font-size:40px;color:white;cursor:pointer;">&times;</span>
+        <img id="lightbox-img" src="" style="max-width:90%; max-height:90%; cursor:grab;">
+        <button id="lightbox-prev" style="position:absolute;top:50%;left:20px;font-size:40px;color:white;background:none;border:none;cursor:pointer;">‹</button>
+        <button id="lightbox-next" style="position:absolute;top:50%;right:20px;font-size:40px;color:white;background:none;border:none;cursor:pointer;">›</button>`;
+    document.body.appendChild(lightboxModal);
+
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxNext = document.getElementById('lightbox-next');
+    const lightboxPrev = document.getElementById('lightbox-prev');
+
+    let currentPropertyId = null;
+    let currentImageIndex = 0;
+
+    // Open lightbox on image click
+    document.querySelectorAll('.property-carousel img').forEach(img => {
+        img.addEventListener('click', function() {
+            currentPropertyId = this.closest('.property-carousel').dataset.propertyId;
+            currentImageIndex = propertyImageIndex[currentPropertyId] || 0;
+            lightboxImg.src = propertyImages[currentPropertyId][currentImageIndex];
+            lightboxModal.style.display = 'flex';
+        });
+    });
+
+    lightboxClose.addEventListener('click', () => { lightboxModal.style.display = 'none'; });
+
+    lightboxNext.addEventListener('click', () => {
+        if(!currentPropertyId) return;
+        const imgs = propertyImages[currentPropertyId];
+        currentImageIndex = (currentImageIndex + 1) % imgs.length;
+        lightboxImg.src = imgs[currentImageIndex];
+    });
+
+    lightboxPrev.addEventListener('click', () => {
+        if(!currentPropertyId) return;
+        const imgs = propertyImages[currentPropertyId];
+        currentImageIndex = (currentImageIndex - 1 + imgs.length) % imgs.length;
+        lightboxImg.src = imgs[currentImageIndex];
+    });
+
+    lightboxModal.addEventListener('click', e => { if(e.target === lightboxModal) lightboxModal.style.display='none'; });
+
+});
 </script>
+
 
 {% endblock %}
