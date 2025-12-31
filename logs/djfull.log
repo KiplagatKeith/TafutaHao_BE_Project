@@ -1478,3 +1478,111 @@ Operations to perform:
   Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
 Running migrations:
   No migrations to apply.
+=== DJFULL START === Tue Dec 23 12:52:08 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.
+=== DJFULL START === Tue Dec 23 01:00:17 PM EAT 2025
+[1] makemigrations...
+Migrations for 'accounts':
+  accounts/migrations/0001_initial.py
+    + Create model CustomUser
+Migrations for 'landlords':
+  landlords/migrations/0001_initial.py
+    + Create model LandlordFavoriteProperty
+    + Create model LandlordProfile
+  landlords/migrations/0002_initial.py
+    + Add field property to landlordfavoriteproperty
+    + Add field user to landlordprofile
+    + Add field landlord to landlordfavoriteproperty
+    ~ Alter unique_together for landlordfavoriteproperty (1 constraint(s))
+Migrations for 'properties':
+  properties/migrations/0001_initial.py
+    + Create model Property
+    + Create model PropertyImage
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying landlords.0001_initial... OK
+  Applying properties.0001_initial... OK
+  Applying landlords.0002_initial... OK
+  Applying sessions.0001_initial... OK
+=== DJFULL START === Tue Dec 23 01:06:50 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions
+Running migrations:
+  No migrations to apply.
+=== DJFULL START === Tue Dec 23 01:18:47 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.
+=== DJFULL START === Tue Dec 23 01:22:40 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.
+=== DJFULL START === Wed Dec 31 03:33:53 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.
+=== DJFULL START === Wed Dec 31 03:42:33 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.
+=== DJFULL START === Wed Dec 31 03:57:34 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.
+=== DJFULL START === Wed Dec 31 03:59:50 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.

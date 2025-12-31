@@ -1,13 +1,12 @@
-<!-- login.html -->
-
 {% extends 'base.html' %}
 
-{% block content %}
-<h2>Landlord Registration</h2>
-<p>Register yourself as a landlord and add at least one property.</p>
+{% block title %}Login{% endblock %}
 
-<form method="POST">
+{% block content %}
+<h2>Login</h2>
+<form method="post">
     {% csrf_token %}
-    <button type="submit">Finish Registration</button>
+    {{ form.as_p }}
+    <button type="submit">Login</button>
 </form>
 {% endblock %}

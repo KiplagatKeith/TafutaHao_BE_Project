@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'TafutaHao.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'TafutaHao_db',
+        'NAME': 'TafutaHao',
         'HOST' : 'localhost',
         'USER' : 'root',
         'PASSWORD' : 'Root@123',
