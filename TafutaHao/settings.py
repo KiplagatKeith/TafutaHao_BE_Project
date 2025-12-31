@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-x&lgn5o0d^folzp6r*y#bjo@#9$zh%x2f$6yc#ktn7+tx@6gf@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"] # Local development
 
 # Application definition
 
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'landlords',
     'properties',
     'tenants',
+    'csp'
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -49,13 +50,14 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 LOGOUT_REDIRECT_URL = '/'  # home page after logout
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware', # Security enhancements
+    'csp.middleware.CSPMiddleware', # Content Security Policy middleware
+    'django.contrib.sessions.middleware.SessionMiddleware', # Session management
+    'django.middleware.common.CommonMiddleware', # Common HTTP features
+    'django.middleware.csrf.CsrfViewMiddleware', # CSRF protection
+    'django.contrib.auth.middleware.AuthenticationMiddleware', # Authentication
+    'django.contrib.messages.middleware.MessageMiddleware', # Messaging framework
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', # Clickjacking protection (X-Frame-Options)
 ]
 
 ROOT_URLCONF = 'TafutaHao.urls'
@@ -138,3 +140,71 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Prevent browser from guessing content types
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Clickjacking protection
+X_FRAME_OPTIONS = "DENY"
+
+# Enable browser XSS filtering
+SECURE_BROWSER_XSS_FILTER = True  
+
+# Prevent JavaScript access to session cookies
+SESSION_COOKIE_HTTPONLY = True
+
+# CSRF cookie not accessible via JS
+CSRF_COOKIE_HTTPONLY = True
+
+# SameSite policy
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+
+USE_HTTPS = False  # <-- KEEP FALSE for localhost
+
+# Only enable these if HTTPS is actually available
+SESSION_COOKIE_SECURE = USE_HTTPS
+CSRF_COOKIE_SECURE = USE_HTTPS
+
+# Redirect HTTP → HTTPS (DISABLED for localhost)
+SECURE_SSL_REDIRECT = USE_HTTPS
+
+SECURE_HSTS_SECONDS = 0  # MUST be 0 for localhost
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+
+CSP_DEFAULT_SRC = ("'self'",)
+
+CSP_SCRIPT_SRC = (
+    "'self'",
+    "'unsafe-inline'",  # allow inline scripts (local dev)
+    "'unsafe-eval'",    # allow eval (dev tools)
+)
+
+CSP_STYLE_SRC = (
+    "'self'",
+    "'unsafe-inline'",
+)
+
+CSP_IMG_SRC = (
+    "'self'",
+    "data:",
+)
+
+CSP_FONT_SRC = (
+    "'self'",
+    "data:",
+)
+
+CSP_CONNECT_SRC = (
+    "'self'",
+)
+
+CSP_FRAME_ANCESTORS = ("'none'",)
+
+CSP_OBJECT_SRC = ("'none'",)
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1",
+    "http://localhost",
+]

@@ -1586,3 +1586,19 @@ Operations to perform:
   Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
 Running migrations:
   No migrations to apply.
+=== DJFULL START === Wed Dec 31 08:29:23 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.
+=== DJFULL START === Wed Dec 31 08:44:36 PM EAT 2025
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.
