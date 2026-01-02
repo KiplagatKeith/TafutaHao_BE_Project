@@ -173,38 +173,36 @@ SECURE_HSTS_SECONDS = 0  # MUST be 0 for localhost
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
 
-CSP_DEFAULT_SRC = ("'self'",)
-
-CSP_SCRIPT_SRC = (
-    "'self'",
-    "'unsafe-inline'",  # allow inline scripts (local dev)
-    "'unsafe-eval'",    # allow eval (dev tools)
-)
-
-CSP_STYLE_SRC = (
-    "'self'",
-    "'unsafe-inline'",
-)
-
-CSP_IMG_SRC = (
-    "'self'",
-    "data:",
-)
-
-CSP_FONT_SRC = (
-    "'self'",
-    "data:",
-)
-
-CSP_CONNECT_SRC = (
-    "'self'",
-)
-
-CSP_FRAME_ANCESTORS = ("'none'",)
-
-CSP_OBJECT_SRC = ("'none'",)
-
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1",
     "http://localhost",
 ]
+
+# Full CSP configuration
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": ("'self'",),
+        "script-src": (
+            "'self'",
+            "'unsafe-inline'",  # for dev only
+            "'unsafe-eval'",    # for dev tools
+        ),
+        "style-src": (
+            "'self'",
+            "'unsafe-inline'",
+        ),
+        "img-src": (
+            "'self'",
+            "data:",
+        ),
+        "font-src": (
+            "'self'",
+            "data:",
+        ),
+        "connect-src": (
+            "'self'",
+        ),
+        "frame-ancestors": ("'none'",),
+        "object-src": ("'none'",),
+    }
+}

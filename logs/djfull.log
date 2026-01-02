@@ -1602,3 +1602,49 @@ Operations to perform:
   Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
 Running migrations:
   No migrations to apply.
+=== DJFULL START === Fri Jan  2 11:38:04 AM EAT 2026
+[1] makemigrations...
+SystemCheckError: System check identified some issues:
+
+ERRORS:
+?: (csp.E001) You are using django-csp < 4.0 settings. Please update your settings to use the new format.
+See https://django-csp.readthedocs.io/en/latest/migration-guide.html for more information.
+
+We have attempted to build the new CSP config for you based on your current settings:
+
+CONTENT_SECURITY_POLICY = {'DIRECTIVES': {'connect-src': ("'self'",),
+                'default-src': ("'self'",),
+                'font-src': ("'self'", 'data:'),
+                'frame-ancestors': ("'none'",),
+                'img-src': ("'self'", 'data:'),
+                'object-src': ("'none'",),
+                'script-src': ("'self'", "'unsafe-inline'", "'unsafe-eval'"),
+                'style-src': ("'self'", "'unsafe-inline'")}}
+[ERROR] makemigrations failed.
+=== DJFULL START === Fri Jan  2 11:41:33 AM EAT 2026
+[1] makemigrations...
+SystemCheckError: System check identified some issues:
+
+ERRORS:
+?: (csp.E001) You are using django-csp < 4.0 settings. Please update your settings to use the new format.
+See https://django-csp.readthedocs.io/en/latest/migration-guide.html for more information.
+
+We have attempted to build the new CSP config for you based on your current settings:
+
+CONTENT_SECURITY_POLICY = {'DIRECTIVES': {'connect-src': ("'self'",),
+                'default-src': ("'self'",),
+                'font-src': ("'self'", 'data:'),
+                'frame-ancestors': ("'none'",),
+                'img-src': ("'self'", 'data:'),
+                'object-src': ("'none'",),
+                'script-src': ("'self'", "'unsafe-inline'", "'unsafe-eval'"),
+                'style-src': ("'self'", "'unsafe-inline'")}}
+[ERROR] makemigrations failed.
+=== DJFULL START === Fri Jan  2 11:42:39 AM EAT 2026
+[1] makemigrations...
+No changes detected
+[2] migrate...
+Operations to perform:
+  Apply all migrations: accounts, admin, auth, contenttypes, landlords, properties, sessions, tenants
+Running migrations:
+  No migrations to apply.
